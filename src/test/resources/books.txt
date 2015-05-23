@@ -1,0 +1,3 @@
+Effective Java;30
+OpenShift Cookbook;55
+Clean Code;45
