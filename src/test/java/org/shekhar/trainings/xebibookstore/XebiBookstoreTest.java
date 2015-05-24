@@ -9,10 +9,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.exceptions.EmptyShoppingCartException;
 
 public class XebiBookstoreTest {
 
 	private XebiBookstore bookstore;
+	
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
@@ -52,9 +54,10 @@ public class XebiBookstoreTest {
 	}
 	
 	@Test
-	public void givenBookInventory_WhenUserAddSameBookTwiceToShoppingCart_ThenUserShouldBeAskedToPayTwoTimesTheActualPriceOfTheBook() throws Exception {
-		final int checkoutAmount = bookstore.checkout("Effective Java","Effective Java");
-		assertThat(checkoutAmount, is(equalTo(60)));
+	public void givenBookInventoryAndEmptyCart_WhenUserCheckout_ThenExceptionIsThrown() throws Exception {
+		expectedException.expect(EmptyShoppingCartException.class);
+		expectedException.expectMessage("You can't checkout an empty cart. Please first add items to the cart.");
+		bookstore.checkout();
 	}
 	
 

@@ -21,22 +21,21 @@ public class FileBasedInventoryManager implements InventoryManager {
 		return booksInventory.containsKey(book);
 	}
 
+	@Override
+	public int bookPrice(String book) throws BookNotInInventoryException {
+		if (booksInventory.containsKey(book)) {
+			return booksInventory.get(book);
+		}
+		throw new BookNotInInventoryException(book);
+	}
+
 	private Map<String, Integer> toBooksInventory(String inventory) {
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(inventory));
-			Map<String, Integer> booksInventory = lines.stream().map(line -> line.split(";")).collect(Collectors.toMap(kv -> kv[0], kv -> Integer.parseInt(kv[1])));
+			Map<String, Integer> booksInventory = lines.stream().map(line -> line.split(";")).collect(Collectors.toMap(bookNameAndPrice -> bookNameAndPrice[0], kv -> Integer.parseInt(kv[1])));
 			return booksInventory;
 		} catch (Exception e) {
 			throw new RuntimeException("Inventory not available at " + inventory);
 		}
 	}
-
-	@Override
-	public int bookPrice(String book) throws BookNotInInventoryException {
-		if(booksInventory.containsKey(book)){
-			return booksInventory.get(book);			
-		}
-		throw new BookNotInInventoryException(book);
-	}
-	
 }
