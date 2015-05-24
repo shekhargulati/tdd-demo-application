@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
 
-public class XebibookstoreTest {
+public class XebiBookstoreTest {
 
 	private XebiBookstore bookstore;
 	@Rule

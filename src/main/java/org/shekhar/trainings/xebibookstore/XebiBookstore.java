@@ -1,41 +1,21 @@
 package org.shekhar.trainings.xebibookstore;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import org.shekhar.trainings.xebibookstore.domain.FileBasedInventoryManager;
+import org.shekhar.trainings.xebibookstore.domain.ShoppingCart;
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
 
 public class XebiBookstore {
 
-	private final Map<String, Integer> booksInventory;
+	private final String inventory;
 
 	public XebiBookstore(final String inventory) {
-		this.booksInventory = toBooksInventory(inventory);
+		this.inventory = inventory;
 	}
 
 	public int checkout(String... books) throws BookNotInInventoryException {
-		return Arrays.stream(books).map(book -> getBookFromInventory(book)).reduce(0, (sum, element) -> sum += element);
-	}
-
-	private Integer getBookFromInventory(String book) {
-		if(booksInventory.containsKey(book)){
-			return booksInventory.get(book);			
-		}
-		throw new BookNotInInventoryException(book);
-	}
-
-	private Map<String, Integer> toBooksInventory(String inventory) {
-		try {
-			List<String> lines = Files.readAllLines(Paths.get(inventory));
-			Map<String, Integer> booksInventory = lines.stream().map(line -> line.split(";")).collect(Collectors.toMap(kv -> kv[0], kv -> Integer.parseInt(kv[1])));
-			return booksInventory;
-		} catch (Exception e) {
-			throw new RuntimeException("Inventory not available at " + inventory);
-		}
+		ShoppingCart cart = new ShoppingCart(new FileBasedInventoryManager(inventory));
+		cart.add(books);
+		return cart.amount();
 	}
 
 	public static void main(String[] args) {
