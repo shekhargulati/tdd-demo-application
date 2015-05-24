@@ -41,5 +41,21 @@ public class XebibookstoreTest {
 		expectedException.expectMessage(equalTo("Sorry, 'Refactoring to Patterns' not in stock!!"));
 		bookstore.checkout(book);
 	}
+	
+	
+	// ******************************* Sprint 1**********************************************//
+	
+	@Test
+	public void givenBookInventory_WhenUserAddMultipleBooksThatExistInInventoryToShoppingCart_ThenUserShouldBeAskedToPaySumOfAllBookPrices() throws Exception {
+		final int checkoutAmount = bookstore.checkout("Effective Java","OpenShift Cookbook");
+		assertThat(checkoutAmount, is(equalTo(85)));
+	}
+	
+	@Test
+	public void givenBookInventory_WhenUserAddSameBookTwiceToShoppingCart_ThenUserShouldBeAskedToPayTwoTimesTheActualPriceOfTheBook() throws Exception {
+		final int checkoutAmount = bookstore.checkout("Effective Java","Effective Java");
+		assertThat(checkoutAmount, is(equalTo(60)));
+	}
+	
 
 }

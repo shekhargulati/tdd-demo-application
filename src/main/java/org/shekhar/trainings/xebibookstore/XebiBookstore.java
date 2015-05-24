@@ -2,6 +2,7 @@ package org.shekhar.trainings.xebibookstore;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,9 +17,13 @@ public class XebiBookstore {
 		this.booksInventory = toBooksInventory(inventory);
 	}
 
-	public int checkout(String book) throws BookNotInInventoryException {
-		if (booksInventory.containsKey(book)) {
-			return booksInventory.get(book);
+	public int checkout(String... books) throws BookNotInInventoryException {
+		return Arrays.stream(books).map(book -> getBookFromInventory(book)).reduce(0, (sum, element) -> sum += element);
+	}
+
+	private Integer getBookFromInventory(String book) {
+		if(booksInventory.containsKey(book)){
+			return booksInventory.get(book);			
 		}
 		throw new BookNotInInventoryException(book);
 	}
