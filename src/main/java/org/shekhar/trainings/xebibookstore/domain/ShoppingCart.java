@@ -18,11 +18,11 @@ public class ShoppingCart {
 		this.inventory = inventory;
 	}
 
-	public void add(String... books) throws BookNotInInventoryException{
+	public void add(String... books) throws BookNotInInventoryException {
 		Arrays.stream(books).forEach(book -> add(book, 1));
 	}
 
-	public void add(String book, int quantity) throws BookNotInInventoryException{
+	public void add(String book, int quantity) throws BookNotInInventoryException {
 		if (!inventory.exists(book)) {
 			throw new BookNotInInventoryException(book);
 		}
@@ -30,7 +30,7 @@ public class ShoppingCart {
 	}
 
 	public int size() {
-		return itemsInCart.size();
+		return itemsInCart.values().stream().reduce(0, (total, quantity) -> total + quantity);
 	}
 
 	public Map<String, Integer> items() {
