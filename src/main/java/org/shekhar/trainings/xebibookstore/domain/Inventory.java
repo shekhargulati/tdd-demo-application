@@ -4,8 +4,12 @@ import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryExceptio
 
 public interface Inventory {
 
-	boolean exists(String book);
+	boolean exists(String title);
 
-	int bookPrice(String book) throws BookNotInInventoryException;
+	int price(String title) throws BookNotInInventoryException;
+
+	String[] add(Book... books);
+
+	String add(Book book);
 
 }

@@ -22,7 +22,7 @@ public class FileBasedInventory implements Inventory {
 	}
 
 	@Override
-	public int bookPrice(String book) throws BookNotInInventoryException {
+	public int price(String book) throws BookNotInInventoryException {
 		if (booksInventory.containsKey(book)) {
 			return booksInventory.get(book);
 		}
@@ -37,5 +37,15 @@ public class FileBasedInventory implements Inventory {
 		} catch (Exception e) {
 			throw new RuntimeException("Inventory not available at " + inventory);
 		}
+	}
+
+	@Override
+	public String[] add(Book... books) {
+		throw new UnsupportedOperationException("You can't add books to File based inventory. Please add books to the inventory file.");
+	}
+
+	@Override
+	public String add(Book book) {
+		throw new UnsupportedOperationException("You can't add books to File based inventory. Please add books to the inventory file.");
 	}
 }

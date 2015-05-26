@@ -41,7 +41,7 @@ public class ShoppingCart {
 		if (itemsInCart.isEmpty()) {
 			throw new EmptyShoppingCartException();
 		}
-		return items().entrySet().stream().map(entry -> entry.getValue() * inventory.bookPrice(entry.getKey())).reduce(0, (sum, element) -> sum += element);
+		return items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element);
 	}
 
 }

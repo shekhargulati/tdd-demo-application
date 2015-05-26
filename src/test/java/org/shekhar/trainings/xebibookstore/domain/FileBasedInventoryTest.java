@@ -4,13 +4,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class FileBasedInventoryManagerTest {
+public class FileBasedInventoryTest {
 
-	private Inventory inventoryManager = new FileBasedInventory("src/test/resources/books.txt");
+	private Inventory inventory = new FileBasedInventory("src/test/resources/books.txt");
 
 	@Test
 	public void existsShouldReturnTrueWhenBookExistsInInventory() throws Exception {
-		assertTrue(inventoryManager.exists("OpenShift Cookbook"));
+		assertTrue(inventory.exists("OpenShift Cookbook"));
 	}
 	
 	

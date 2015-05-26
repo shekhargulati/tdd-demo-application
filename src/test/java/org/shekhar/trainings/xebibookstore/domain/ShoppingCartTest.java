@@ -69,15 +69,15 @@ public class ShoppingCartTest {
 		cart.add("OpenShift Cookbook", "Effective Java", "Clean Code");
 		verify(inventory, times(3)).exists(anyString());
 
-		when(inventory.bookPrice("OpenShift Cookbook")).thenReturn(45);
-		when(inventory.bookPrice("Effective Java")).thenReturn(30);
-		when(inventory.bookPrice("Clean Code")).thenReturn(55);
+		when(inventory.price("OpenShift Cookbook")).thenReturn(45);
+		when(inventory.price("Effective Java")).thenReturn(30);
+		when(inventory.price("Clean Code")).thenReturn(55);
 
 		int cartAmount = cart.checkout();
 
 		assertThat(cartAmount, is(equalTo(130)));
 
-		verify(inventory, times(3)).bookPrice(anyString());
+		verify(inventory, times(3)).price(anyString());
 		verifyNoMoreInteractions(inventory);
 	}
 
@@ -102,15 +102,15 @@ public class ShoppingCartTest {
 		
 		verify(inventory, times(3)).exists(anyString());
 
-		when(inventory.bookPrice("OpenShift Cookbook")).thenReturn(45);
-		when(inventory.bookPrice("Effective Java")).thenReturn(30);
-		when(inventory.bookPrice("Clean Code")).thenReturn(55);
+		when(inventory.price("OpenShift Cookbook")).thenReturn(45);
+		when(inventory.price("Effective Java")).thenReturn(30);
+		when(inventory.price("Clean Code")).thenReturn(55);
 
 		int cartAmount = cart.checkout();
 
 		assertThat(cartAmount, is(equalTo(790)));
 
-		verify(inventory, times(3)).bookPrice(anyString());
+		verify(inventory, times(3)).price(anyString());
 		verifyNoMoreInteractions(inventory);
 	}
 }

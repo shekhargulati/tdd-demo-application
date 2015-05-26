@@ -80,10 +80,5 @@ public class XebiBookstoreTest {
 		int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(275)));
 	}
-	
-	
-	
-	
-	
 
 }
