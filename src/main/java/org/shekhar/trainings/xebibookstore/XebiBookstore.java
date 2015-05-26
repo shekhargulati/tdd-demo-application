@@ -1,6 +1,6 @@
 package org.shekhar.trainings.xebibookstore;
 
-import org.shekhar.trainings.xebibookstore.domain.FileBasedInventoryManager;
+import org.shekhar.trainings.xebibookstore.domain.FileBasedInventory;
 import org.shekhar.trainings.xebibookstore.domain.ShoppingCart;
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
 import org.shekhar.trainings.xebibookstore.exceptions.EmptyShoppingCartException;
@@ -17,7 +17,7 @@ public class XebiBookstore {
 		if (books == null || books.length == 0) {
 			throw new EmptyShoppingCartException();
 		}
-		ShoppingCart cart = new ShoppingCart(new FileBasedInventoryManager(inventory));
+		ShoppingCart cart = new ShoppingCart(new FileBasedInventory(inventory));
 		cart.add(books);
 		return cart.amount();
 	}

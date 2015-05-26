@@ -19,7 +19,7 @@ import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryExceptio
 
 public class ShoppingCartTest {
 
-	private final InventoryManager inventoryManager = mock(InventoryManager.class);
+	private final Inventory inventoryManager = mock(Inventory.class);
 	private final ShoppingCart cart = new ShoppingCart(inventoryManager);
 
 	@Rule

@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
 
-public class FileBasedInventoryManager implements InventoryManager {
+public class FileBasedInventory implements Inventory {
 
 	private final Map<String, Integer> booksInventory;
 
-	public FileBasedInventoryManager(String inventory) {
+	public FileBasedInventory(String inventory) {
 		this.booksInventory = toBooksInventory(inventory);
 	}
 

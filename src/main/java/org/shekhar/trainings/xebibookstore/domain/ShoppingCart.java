@@ -11,11 +11,11 @@ import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryExceptio
 
 public class ShoppingCart {
 
-	private final InventoryManager inventoryManager;
+	private final Inventory inventoryManager;
 
 	private List<String> itemsInCart = new ArrayList<>();
 
-	public ShoppingCart(InventoryManager inventoryManager) {
+	public ShoppingCart(Inventory inventoryManager) {
 		this.inventoryManager = inventoryManager;
 	}
 

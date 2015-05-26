@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class FileBasedInventoryManagerTest {
 
-	private InventoryManager inventoryManager = new FileBasedInventoryManager("src/test/resources/books.txt");
+	private Inventory inventoryManager = new FileBasedInventory("src/test/resources/books.txt");
 
 	@Test
 	public void existsShouldReturnTrueWhenBookExistsInInventory() throws Exception {
