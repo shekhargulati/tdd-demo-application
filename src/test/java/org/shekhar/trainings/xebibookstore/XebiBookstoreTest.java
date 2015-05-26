@@ -4,25 +4,25 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.shekhar.trainings.xebibookstore.domain.FileBasedInventory;
+import org.shekhar.trainings.xebibookstore.domain.ShoppingCart;
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
 import org.shekhar.trainings.xebibookstore.exceptions.EmptyShoppingCartException;
 
 public class XebiBookstoreTest {
 
-	private XebiBookstore bookstore;
+	private ShoppingCart cart;
 	
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setup() {
-		bookstore = new XebiBookstore("src/test/resources/books.txt");
+		cart = new ShoppingCart(new FileBasedInventory("src/test/resources/books.txt"));
 	}
 
 	/*
@@ -32,17 +32,16 @@ public class XebiBookstoreTest {
 	 */
 	@Test
 	public void givenBookInventory_WhenUserCheckoutABookThatExistInInventory_ThenUserIsAskedToPayTheActualPrice() {
-		final String book = "Effective Java";
-		final int price = bookstore.checkout(book);
+		cart.add("Effective Java",1);
+		final int price = cart.checkout();
 		assertThat(price, is(equalTo(30)));
 	}
 
 	@Test
 	public void givenBookInventory_WhenUserCheckoutABookThatDoesNotExistInInventory_ThenExceptionIsThrown() throws Exception {
-		final String book = "Refactoring to Patterns";
 		expectedException.expect(BookNotInInventoryException.class);
 		expectedException.expectMessage(equalTo("Sorry, 'Refactoring to Patterns' not in stock!!"));
-		bookstore.checkout(book);
+		cart.add("Refactoring to Patterns");
 	}
 	
 	
@@ -55,7 +54,9 @@ public class XebiBookstoreTest {
 	
 	@Test
 	public void givenBookInventory_WhenUserAddMultipleBooksThatExistInInventoryToShoppingCart_ThenUserShouldBeAskedToPaySumOfAllBookPrices() throws Exception {
-		final int checkoutAmount = bookstore.checkout("Effective Java","OpenShift Cookbook");
+		cart.add("Effective Java",1);
+		cart.add("OpenShift Cookbook",1);
+		final int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(85)));
 	}
 	
@@ -63,7 +64,7 @@ public class XebiBookstoreTest {
 	public void givenBookInventory_WhenUserTriesToCheckoutAnEmptyCart_ThenExceptionIsThrown() throws Exception {
 		expectedException.expect(EmptyShoppingCartException.class);
 		expectedException.expectMessage("You can't checkout an empty cart. Please first add items to the cart.");
-		bookstore.checkout();
+		cart.checkout();
 	}
 	
 	/*
@@ -75,10 +76,9 @@ public class XebiBookstoreTest {
 	
 	@Test
 	public void givenBookInventory_WhenUserTriesToDoBulkCheckoutOfABook_ThenCheckoutAmountIsQuanityTimesBookPrice() throws Exception {
-		String[] books = new String[2];
-		Arrays.fill(books, "OpenShift Cookbook");
-		int checkoutAmount = bookstore.checkout(books);
-		assertThat(checkoutAmount, is(equalTo(110)));
+		cart.add("OpenShift Cookbook", 5);
+		int checkoutAmount = cart.checkout();
+		assertThat(checkoutAmount, is(equalTo(275)));
 		
 	}
 	

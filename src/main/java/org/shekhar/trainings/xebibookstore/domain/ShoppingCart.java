@@ -1,46 +1,47 @@
 package org.shekhar.trainings.xebibookstore.domain;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.exceptions.EmptyShoppingCartException;
 
 public class ShoppingCart {
 
-	private final Inventory inventoryManager;
+	private final Inventory inventory;
 
-	private List<String> itemsInCart = new ArrayList<>();
+	private Map<String, Integer> itemsInCart = new HashMap<>();
 
-	public ShoppingCart(Inventory inventoryManager) {
-		this.inventoryManager = inventoryManager;
+	public ShoppingCart(Inventory inventory) {
+		this.inventory = inventory;
 	}
 
-	public void add(String... books) {
-		Map<Boolean, List<String>> booksPartionedByInventoryExistsPredicate = Arrays.stream(books).collect(Collectors.partitioningBy(book -> inventoryManager.exists(book)));
-		if (booksPartionedByInventoryExistsPredicate.containsKey(false) && !booksPartionedByInventoryExistsPredicate.get(false).isEmpty()) {
-			List<String> booksNotInInventory = booksPartionedByInventoryExistsPredicate.get(false);
-			throw new BookNotInInventoryException(booksNotInInventory);
+	public void add(String... books) throws BookNotInInventoryException{
+		Arrays.stream(books).forEach(book -> add(book, 1));
+	}
+
+	public void add(String book, int quantity) throws BookNotInInventoryException{
+		if (!inventory.exists(book)) {
+			throw new BookNotInInventoryException(book);
 		}
-
-		List<String> booksInInventory = booksPartionedByInventoryExistsPredicate.get(true);
-		booksInInventory.forEach(book -> itemsInCart.add(book));
-
+		itemsInCart.put(book, itemsInCart.compute(book, (k, v) -> (k == null) ? quantity : (v == null ? 0 : v) + quantity));
 	}
 
 	public int size() {
 		return itemsInCart.size();
 	}
-	
-	public List<String> items() {
-		return Collections.unmodifiableList(itemsInCart);
+
+	public Map<String, Integer> items() {
+		return Collections.unmodifiableMap(itemsInCart);
 	}
 
-	public int amount() {
-		return items().stream().map(book -> inventoryManager.bookPrice(book)).reduce(0, (sum, element) -> sum += element);
+	public int checkout() throws EmptyShoppingCartException {
+		if (itemsInCart.isEmpty()) {
+			throw new EmptyShoppingCartException();
+		}
+		return items().entrySet().stream().map(entry -> entry.getValue() * inventory.bookPrice(entry.getKey())).reduce(0, (sum, element) -> sum += element);
 	}
 
 }
