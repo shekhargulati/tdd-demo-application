@@ -32,7 +32,7 @@ public class XebiBookstoreTest {
 	 */
 	@Test
 	public void givenBookInventory_WhenUserCheckoutABookThatExistInInventory_ThenUserIsAskedToPayTheActualPrice() {
-		cart.add("Effective Java",1);
+		cart.add("Effective Java");
 		final int price = cart.checkout();
 		assertThat(price, is(equalTo(30)));
 	}
@@ -54,8 +54,8 @@ public class XebiBookstoreTest {
 	
 	@Test
 	public void givenBookInventory_WhenUserAddMultipleBooksThatExistInInventoryToShoppingCart_ThenUserShouldBeAskedToPaySumOfAllBookPrices() throws Exception {
-		cart.add("Effective Java",1);
-		cart.add("OpenShift Cookbook",1);
+		cart.add("Effective Java");
+		cart.add("OpenShift Cookbook");
 		final int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(85)));
 	}
@@ -79,8 +79,9 @@ public class XebiBookstoreTest {
 		cart.add("OpenShift Cookbook", 5);
 		int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(275)));
-		
 	}
+	
+	
 	
 	
 	
