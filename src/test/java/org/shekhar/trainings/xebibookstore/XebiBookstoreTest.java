@@ -17,8 +17,9 @@ import org.shekhar.trainings.xebibookstore.domain.FileBasedInventory;
 import org.shekhar.trainings.xebibookstore.domain.InMemoryInventory;
 import org.shekhar.trainings.xebibookstore.domain.Inventory;
 import org.shekhar.trainings.xebibookstore.domain.ShoppingCart;
-import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
-import org.shekhar.trainings.xebibookstore.exceptions.EmptyShoppingCartException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.EmptyShoppingCartException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.NotEnoughBooksInInventoryExceptiopn;
 
 public class XebiBookstoreTest {
 

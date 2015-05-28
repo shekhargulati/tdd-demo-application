@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
 
 public class InMemoryInventory implements Inventory {
 

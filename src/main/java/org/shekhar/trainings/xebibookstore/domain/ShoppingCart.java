@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
-import org.shekhar.trainings.xebibookstore.exceptions.EmptyShoppingCartException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.EmptyShoppingCartException;
 
 public class ShoppingCart {
 

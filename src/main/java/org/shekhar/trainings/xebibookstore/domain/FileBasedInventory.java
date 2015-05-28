@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
 
 public class FileBasedInventory implements Inventory {
 

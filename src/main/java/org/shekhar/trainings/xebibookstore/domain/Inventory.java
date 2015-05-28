@@ -1,6 +1,6 @@
 package org.shekhar.trainings.xebibookstore.domain;
 
-import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
 
 public interface Inventory {
 

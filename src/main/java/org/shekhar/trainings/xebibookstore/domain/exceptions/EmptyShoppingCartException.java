@@ -1,4 +1,4 @@
-package org.shekhar.trainings.xebibookstore.exceptions;
+package org.shekhar.trainings.xebibookstore.domain.exceptions;
 
 public class EmptyShoppingCartException extends RuntimeException {
 

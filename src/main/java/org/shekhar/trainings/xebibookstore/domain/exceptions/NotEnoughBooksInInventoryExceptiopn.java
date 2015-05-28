@@ -1,4 +1,4 @@
-package org.shekhar.trainings.xebibookstore;
+package org.shekhar.trainings.xebibookstore.domain.exceptions;
 
 public class NotEnoughBooksInInventoryExceptiopn extends RuntimeException {
 

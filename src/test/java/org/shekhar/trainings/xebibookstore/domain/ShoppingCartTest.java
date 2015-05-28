@@ -14,7 +14,7 @@ import org.hamcrest.collection.IsMapContaining;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.shekhar.trainings.xebibookstore.exceptions.BookNotInInventoryException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
 
 public class ShoppingCartTest {
 
