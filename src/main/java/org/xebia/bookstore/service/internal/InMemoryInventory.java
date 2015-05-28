@@ -1,11 +1,13 @@
-package org.shekhar.trainings.xebibookstore.domain;
+package org.xebia.bookstore.service.internal;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.model.Book;
+import org.xebia.bookstore.service.Inventory;
 
 public class InMemoryInventory implements Inventory {
 

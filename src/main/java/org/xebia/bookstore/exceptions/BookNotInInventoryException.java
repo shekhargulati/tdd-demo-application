@@ -1,4 +1,4 @@
-package org.shekhar.trainings.xebibookstore.domain.exceptions;
+package org.xebia.bookstore.exceptions;
 
 import java.util.List;
 import java.util.stream.Collectors;

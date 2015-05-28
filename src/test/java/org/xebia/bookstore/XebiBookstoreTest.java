@@ -1,4 +1,4 @@
-package org.shekhar.trainings.xebibookstore;
+package org.xebia.bookstore;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -12,13 +12,13 @@ import java.util.Collections;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.shekhar.trainings.xebibookstore.domain.Book;
-import org.shekhar.trainings.xebibookstore.domain.InMemoryInventory;
-import org.shekhar.trainings.xebibookstore.domain.Inventory;
-import org.shekhar.trainings.xebibookstore.domain.ShoppingCart;
-import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
-import org.shekhar.trainings.xebibookstore.domain.exceptions.EmptyShoppingCartException;
-import org.shekhar.trainings.xebibookstore.domain.exceptions.NotEnoughBooksInInventoryException;
+import org.xebia.bookstore.ShoppingCart;
+import org.xebia.bookstore.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
+import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
+import org.xebia.bookstore.model.Book;
+import org.xebia.bookstore.service.Inventory;
+import org.xebia.bookstore.service.internal.InMemoryInventory;
 
 public class XebiBookstoreTest {
 

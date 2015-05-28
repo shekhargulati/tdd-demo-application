@@ -1,13 +1,14 @@
-package org.shekhar.trainings.xebibookstore.domain;
+package org.xebia.bookstore;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
-import org.shekhar.trainings.xebibookstore.domain.exceptions.EmptyShoppingCartException;
-import org.shekhar.trainings.xebibookstore.domain.exceptions.NotEnoughBooksInInventoryException;
+import org.xebia.bookstore.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
+import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
+import org.xebia.bookstore.service.Inventory;
 
 public class ShoppingCart {
 

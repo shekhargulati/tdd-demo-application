@@ -1,4 +1,4 @@
-package org.shekhar.trainings.xebibookstore.domain;
+package org.xebia.bookstore.model;
 
 import java.time.LocalDate;
 import java.util.Collections;

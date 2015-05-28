@@ -1,6 +1,7 @@
-package org.shekhar.trainings.xebibookstore.domain;
+package org.xebia.bookstore.service;
 
-import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.model.Book;
 
 public interface Inventory {
 
