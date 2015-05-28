@@ -110,9 +110,31 @@ public class XebiBookstoreTest {
 		assertThat(checkoutAmount, is(equalTo(105)));
 	}
 	
+	
+	/*
+	 * As a user
+	 * I want to be notified when I add more copies than available in inventory
+	 * So that I can remove them from the cart
+	 */
+	@Test
+	public void givenOnlyTwoOpenShiftCookbooksInTheInventory_WhenUserAddMoreThanTwoCopiesOfOpenShiftCookbookInTheCart_ThenErrorMessageShouldBeShownToTheUser() throws Exception {
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(2));
+		
+		ShoppingCart cart = new ShoppingCart(inventory);
+		cart.add("OpenShift Cookbook", 5);
+		
+		expectedException.expect(NotEnoughBooksInInventoryExceptiopn.class);
+		expectedException.expectMessage(is(equalTo("There are only '2' copies of 'OpenShift Cookbook' in the inventory.")));
+	}
+	
+	
 	private static Book[] books() {
-		Book book1 = new Book("Effective Java", "Joshua Bloch", 40, LocalDate.of(2008, Month.MAY, 28), 1, Arrays.asList("java", "programming"));
-		Book book2 = new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), 1, Arrays.asList("cloud", "programming"));
+		return books(1);
+	}
+	private static Book[] books(int quantity) {
+		Book book1 = new Book("Effective Java", "Joshua Bloch", 40, LocalDate.of(2008, Month.MAY, 28), quantity, Arrays.asList("java", "programming"));
+		Book book2 = new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), quantity, Arrays.asList("cloud", "programming"));
 		return new Book[] { book1, book2 };
 	}
 	

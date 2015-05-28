@@ -113,4 +113,9 @@ public class ShoppingCartTest {
 		verify(inventory, times(3)).price(anyString());
 		verifyNoMoreInteractions(inventory);
 	}
+	
+	@Test
+	public void throwExceptionWhenMoreItemsAreAddedToTheCartThanAvailableInInventory() throws Exception {
+		
+	}
 }
