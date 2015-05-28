@@ -13,13 +13,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.shekhar.trainings.xebibookstore.domain.Book;
-import org.shekhar.trainings.xebibookstore.domain.FileBasedInventory;
 import org.shekhar.trainings.xebibookstore.domain.InMemoryInventory;
 import org.shekhar.trainings.xebibookstore.domain.Inventory;
 import org.shekhar.trainings.xebibookstore.domain.ShoppingCart;
 import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
 import org.shekhar.trainings.xebibookstore.domain.exceptions.EmptyShoppingCartException;
-import org.shekhar.trainings.xebibookstore.domain.exceptions.NotEnoughBooksInInventoryExceptiopn;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.NotEnoughBooksInInventoryException;
 
 public class XebiBookstoreTest {
 
@@ -33,15 +32,20 @@ public class XebiBookstoreTest {
 	 */
 	@Test
 	public void givenBookInventory_WhenUserCheckoutABookThatExistInInventory_ThenUserIsAskedToPayTheActualPrice() {
-		ShoppingCart cart = new ShoppingCart(new FileBasedInventory("src/test/resources/books.txt"));
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(2));
+		
+		ShoppingCart cart = new ShoppingCart(inventory);
 		cart.add("Effective Java");
 		final int price = cart.checkout();
-		assertThat(price, is(equalTo(30)));
+		assertThat(price, is(equalTo(40)));
 	}
 
 	@Test
 	public void givenBookInventory_WhenUserCheckoutABookThatDoesNotExistInInventory_ThenExceptionIsThrown() throws Exception {
-		ShoppingCart cart = new ShoppingCart(new FileBasedInventory("src/test/resources/books.txt"));
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(2));
+		ShoppingCart cart = new ShoppingCart(inventory);
 		expectedException.expect(BookNotInInventoryException.class);
 		expectedException.expectMessage(equalTo("Sorry, 'Refactoring to Patterns' not in stock!!"));
 		cart.add("Refactoring to Patterns");
@@ -57,16 +61,21 @@ public class XebiBookstoreTest {
 	
 	@Test
 	public void givenBookInventory_WhenUserAddMultipleBooksThatExistInInventoryToShoppingCart_ThenUserShouldBeAskedToPaySumOfAllBookPrices() throws Exception {
-		ShoppingCart cart = new ShoppingCart(new FileBasedInventory("src/test/resources/books.txt"));
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(2));
+		
+		ShoppingCart cart = new ShoppingCart(inventory);
 		cart.add("Effective Java");
 		cart.add("OpenShift Cookbook");
 		final int checkoutAmount = cart.checkout();
-		assertThat(checkoutAmount, is(equalTo(85)));
+		assertThat(checkoutAmount, is(equalTo(95)));
 	}
 	
 	@Test
 	public void givenBookInventory_WhenUserTriesToCheckoutAnEmptyCart_ThenExceptionIsThrown() throws Exception {
-		ShoppingCart cart = new ShoppingCart(new FileBasedInventory("src/test/resources/books.txt"));
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(2));
+		ShoppingCart cart = new ShoppingCart(inventory);
 		expectedException.expect(EmptyShoppingCartException.class);
 		expectedException.expectMessage("You can't checkout an empty cart. Please first add items to the cart.");
 		cart.checkout();
@@ -81,7 +90,10 @@ public class XebiBookstoreTest {
 	
 	@Test
 	public void givenBookInventory_WhenUserTriesToDoBulkCheckoutOfABook_ThenCheckoutAmountIsQuanityTimesBookPrice() throws Exception {
-		ShoppingCart cart = new ShoppingCart(new FileBasedInventory("src/test/resources/books.txt"));
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(5));
+		
+		ShoppingCart cart = new ShoppingCart(inventory);
 		cart.add("OpenShift Cookbook", 5);
 		int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(275)));
@@ -123,10 +135,11 @@ public class XebiBookstoreTest {
 		inventory.add(books(2));
 		
 		ShoppingCart cart = new ShoppingCart(inventory);
+		expectedException.expect(NotEnoughBooksInInventoryException.class);
+		expectedException.expectMessage(is(equalTo("There are not enough copies of 'OpenShift Cookbook' in the inventory.")));
+
 		cart.add("OpenShift Cookbook", 5);
 		
-		expectedException.expect(NotEnoughBooksInInventoryExceptiopn.class);
-		expectedException.expectMessage(is(equalTo("There are only '2' copies of 'OpenShift Cookbook' in the inventory.")));
 	}
 	
 	

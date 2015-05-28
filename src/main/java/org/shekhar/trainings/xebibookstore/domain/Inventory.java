@@ -12,4 +12,6 @@ public interface Inventory {
 
 	String add(Book book);
 
+	boolean hasEnoughCopies(String title, int quantity);
+
 }

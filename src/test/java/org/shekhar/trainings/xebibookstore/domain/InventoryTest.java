@@ -22,7 +22,7 @@ public class InventoryTest {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
-	
+
 	private Inventory inventory;
 
 	@Before
@@ -62,9 +62,9 @@ public class InventoryTest {
 	@Test
 	public void findBookInOneMillionBooks() throws Exception {
 		IntStream.rangeClosed(1, 1000000).forEach(i -> inventory.add(new Book("book" + i, "author" + i, i, LocalDate.of(2008, Month.MAY, 21), 1, Collections.emptyList())));
-//		long start = System.currentTimeMillis();
+// long start = System.currentTimeMillis();
 		boolean exists = inventory.exists("book_test");
-//		System.out.println("Total time " + (System.currentTimeMillis() - start));
+// System.out.println("Total time " + (System.currentTimeMillis() - start));
 		assertFalse(exists);
 	}
 
@@ -79,13 +79,35 @@ public class InventoryTest {
 	public void throwExceptionWhenPriceCheckedForBookNotInInventory() throws Exception {
 		expectedException.expect(isA(BookNotInInventoryException.class));
 		expectedException.expectMessage(is(equalTo("Sorry, 'Effective Java' not in stock!!")));
-		
+
 		inventory.price("Effective Java");
 	}
-	
+
+	@Test
+	public void trueWhenNotEnoughCopiesInInventory() throws Exception {
+		inventory.add(books(2));
+
+		boolean enoughCopies = inventory.hasEnoughCopies("OpenShift Cookbook", 2);
+
+		assertTrue(enoughCopies);
+	}
+
+	@Test
+	public void falseWhenNotEnoughCopiesInInventory() throws Exception {
+		inventory.add(books(2));
+
+		boolean enoughCopies = inventory.hasEnoughCopies("OpenShift Cookbook", 5);
+
+		assertFalse(enoughCopies);
+	}
+
 	private static Book[] books() {
-		Book book1 = new Book("Effective Java", "Joshua Bloch", 40, LocalDate.of(2008, Month.MAY, 28), 1, Arrays.asList("java", "programming"));
-		Book book2 = new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), 1, Arrays.asList("cloud", "programming"));
+		return books(1);
+	}
+
+	private static Book[] books(int quanity) {
+		Book book1 = new Book("Effective Java", "Joshua Bloch", 40, LocalDate.of(2008, Month.MAY, 28), quanity, Arrays.asList("java", "programming"));
+		Book book2 = new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), quanity, Arrays.asList("cloud", "programming"));
 		return new Book[] { book1, book2 };
 	}
 }

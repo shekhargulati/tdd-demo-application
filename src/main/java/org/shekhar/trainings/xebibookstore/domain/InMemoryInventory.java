@@ -38,11 +38,15 @@ public class InMemoryInventory implements Inventory {
 		return id;
 	}
 
+	@Override
+	public boolean hasEnoughCopies(String title, int quantity) {
+		return inventory.get(title).getQuantity() >= quantity;
+	}
+
 	private static class BookIdGenerator {
 
 		public static String newBookIdentifer() {
 			return UUID.randomUUID().toString();
 		}
 	}
-
 }

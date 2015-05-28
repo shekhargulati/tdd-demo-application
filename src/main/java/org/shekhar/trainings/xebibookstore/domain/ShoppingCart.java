@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.shekhar.trainings.xebibookstore.domain.exceptions.BookNotInInventoryException;
 import org.shekhar.trainings.xebibookstore.domain.exceptions.EmptyShoppingCartException;
+import org.shekhar.trainings.xebibookstore.domain.exceptions.NotEnoughBooksInInventoryException;
 
 public class ShoppingCart {
 
@@ -22,11 +23,14 @@ public class ShoppingCart {
 		Arrays.stream(books).forEach(book -> add(book, 1));
 	}
 
-	public void add(String book, int quantity) throws BookNotInInventoryException {
-		if (!inventory.exists(book)) {
-			throw new BookNotInInventoryException(book);
+	public void add(String title, int quantity) throws BookNotInInventoryException, NotEnoughBooksInInventoryException {
+		if (!inventory.exists(title)) {
+			throw new BookNotInInventoryException(title);
 		}
-		itemsInCart.put(book, itemsInCart.compute(book, (k, v) -> (k == null) ? quantity : (v == null ? 0 : v) + quantity));
+		if (!inventory.hasEnoughCopies(title, quantity)) {
+			throw new NotEnoughBooksInInventoryException(title);
+		}
+		itemsInCart.put(title, itemsInCart.compute(title, (k, v) -> (k == null) ? quantity : (v == null ? 0 : v) + quantity));
 	}
 
 	public int size() {
