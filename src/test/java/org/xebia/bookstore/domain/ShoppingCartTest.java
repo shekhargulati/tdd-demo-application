@@ -2,7 +2,7 @@ package org.xebia.bookstore.domain;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -32,7 +32,7 @@ public class ShoppingCartTest {
 	public void canAddMultipleBooksToTheShoppingCart() throws Exception {
 		when(inventory.exists("Effective Java")).thenReturn(true);
 		when(inventory.exists("OpenShift Cookbook")).thenReturn(true);
-		
+
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
 
 		cart.add("Effective Java");
@@ -42,7 +42,7 @@ public class ShoppingCartTest {
 
 		verify(inventory, times(1)).exists("Effective Java");
 		verify(inventory, times(1)).exists("OpenShift Cookbook");
-		verify(inventory,times(2)).hasEnoughCopies(anyString(), anyInt());
+		verify(inventory, times(2)).hasEnoughCopies(anyString(), anyInt());
 		verifyNoMoreInteractions(inventory);
 	}
 
@@ -57,9 +57,9 @@ public class ShoppingCartTest {
 		assertThat(cart.items(), IsMapContaining.hasEntry(equalTo("Effective Java"), equalTo(1)));
 
 		verify(inventory, times(3)).exists(anyString());
-		verify(inventory,times(3)).hasEnoughCopies(anyString(), anyInt());
+		verify(inventory, times(3)).hasEnoughCopies(anyString(), anyInt());
 		verifyNoMoreInteractions(inventory);
-		
+
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class ShoppingCartTest {
 	public void cartAmountIsEqualToSumOfAllItemPrices() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
-		
+
 		cart.add("OpenShift Cookbook", "Effective Java", "Clean Code");
 		verify(inventory, times(3)).exists(anyString());
 
@@ -90,7 +90,7 @@ public class ShoppingCartTest {
 		assertThat(cartAmount, is(equalTo(130)));
 
 		verify(inventory, times(3)).price(anyString());
-		verify(inventory,times(3)).hasEnoughCopies(anyString(), anyInt());
+		verify(inventory, times(3)).hasEnoughCopies(anyString(), anyInt());
 		verifyNoMoreInteractions(inventory);
 	}
 
@@ -114,7 +114,7 @@ public class ShoppingCartTest {
 		when(inventory.hasEnoughCopies("OpenShift Cookbook", 2)).thenReturn(true);
 		when(inventory.hasEnoughCopies("Effective Java", 5)).thenReturn(true);
 		when(inventory.hasEnoughCopies("Clean Code", 10)).thenReturn(true);
-		
+
 		cart.add("OpenShift Cookbook", 2);
 		cart.add("Effective Java", 5);
 		cart.add("Clean Code", 10);

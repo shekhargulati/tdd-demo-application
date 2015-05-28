@@ -12,7 +12,7 @@ public class Book {
 	private final LocalDate publishedOn;
 	private final int quantity;
 	private final List<String> categories;
-	
+
 	private String id;
 
 	public Book(String title, String author, int price, LocalDate publishedOn, int quantity, List<String> categories) {
@@ -47,16 +47,13 @@ public class Book {
 	public List<String> getCategories() {
 		return categories;
 	}
-	
-	public void assignBookId(String id){
+
+	public void assignBookId(String id) {
 		this.id = id;
 	}
 
 	public String getId() {
 		return id;
 	}
-	
-	
-	
 
 }
