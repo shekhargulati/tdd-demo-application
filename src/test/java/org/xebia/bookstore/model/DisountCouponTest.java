@@ -11,14 +11,14 @@ public class DisountCouponTest {
 	public void startDateShouldBeLessThanEndDate() {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.minusHours(12);
-		new DisountCoupon(20, start, end);
+		new DiscountCoupon(20, start, end);
 	}
 	
 	@Test(expected = InvalidDiscountCouponException.class)
 	public void discountCouponCantBeNegative() throws Exception {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(12);
-		new DisountCoupon(-20, start, end);
+		new DiscountCoupon(-20, start, end);
 	}
 
 }

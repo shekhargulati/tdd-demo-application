@@ -21,14 +21,17 @@ import org.junit.rules.ExpectedException;
 import org.xebia.bookstore.ShoppingCart;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.ExpiredDisountCouponException;
+import org.xebia.bookstore.exceptions.InvalidDiscountCouponException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
-import org.xebia.bookstore.model.DisountCoupon;
+import org.xebia.bookstore.model.DiscountCoupon;
+import org.xebia.bookstore.service.DiscountService;
 import org.xebia.bookstore.service.Inventory;
 
 public class ShoppingCartTest {
 
 	private final Inventory inventory = mock(Inventory.class);
-	private final ShoppingCart cart = new ShoppingCart(inventory);
+	private final DiscountService discountService = mock(DiscountService.class);
+	private final ShoppingCart cart = new ShoppingCart(inventory, discountService);
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -171,14 +174,19 @@ public class ShoppingCartTest {
 
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
-		int cartAmount = cart.checkout(new DisountCoupon(20, start, end));
+
+		String couponCode = "valid_discount_coupon";
+
+		when(discountService.find(couponCode)).thenReturn(new DiscountCoupon(20, start, end));
+		int cartAmount = cart.checkout(couponCode);
 
 		assertThat(cartAmount, is(equalTo(196)));
 
 		verify(inventory, times(2)).price(anyString());
 		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
 		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
-		verifyNoMoreInteractions(inventory);
+		verify(discountService, times(1)).find(couponCode);
+		verifyNoMoreInteractions(inventory, discountService);
 	}
 
 	@Test
@@ -194,17 +202,41 @@ public class ShoppingCartTest {
 		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
 		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
 		verifyNoMoreInteractions(inventory);
-		
+
 		LocalDateTime start = LocalDateTime.now().minusDays(2);
 		LocalDateTime end = start.plusHours(24);
-		
+
+		String couponCode = "expired_discount_coupon";
+
+		when(discountService.find(couponCode)).thenReturn(new DiscountCoupon(20, start, end));
+
 		expectedException.expect(isA(ExpiredDisountCouponException.class));
 		expectedException.expectMessage(is(equalTo("Sorry, the coupon code has expired.")));
-		
-		cart.checkout(new DisountCoupon(20, start, end));
-
+		cart.checkout("expired_discount_coupon");
 	}
-	
-	
+
+	@Test
+	public void throwExceptionWhenCouponCodeDoesNotExist() throws Exception {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
+		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+
+		cart.add("OpenShift Cookbook", 3);
+		cart.add("Effective Java", 2);
+
+		verify(inventory, times(2)).exists(anyString());
+		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
+		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verifyNoMoreInteractions(inventory);
+
+		String couponCode = "invalid_discount_coupon";
+
+		when(discountService.find(couponCode)).thenThrow(new InvalidDiscountCouponException("Sorry, the coupon code you entered does not exist."));
+
+		expectedException.expect(isA(InvalidDiscountCouponException.class));
+		expectedException.expectMessage(is(equalTo("Sorry, the coupon code you entered does not exist.")));
+
+		cart.checkout(couponCode);
+	}
 
 }

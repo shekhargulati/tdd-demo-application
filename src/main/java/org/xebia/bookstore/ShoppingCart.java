@@ -9,18 +9,21 @@ import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
 import org.xebia.bookstore.exceptions.ExpiredDisountCouponException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
-import org.xebia.bookstore.model.DisountCoupon;
+import org.xebia.bookstore.model.DiscountCoupon;
 import org.xebia.bookstore.model.EmptyDiscountCoupon;
+import org.xebia.bookstore.service.DiscountService;
 import org.xebia.bookstore.service.Inventory;
 
 public class ShoppingCart {
 
 	private final Inventory inventory;
+	private final DiscountService discountService;
 
 	private Map<String, Integer> itemsInCart = new HashMap<>();
 
-	public ShoppingCart(Inventory inventory) {
+	public ShoppingCart(Inventory inventory, DiscountService discountService) {
 		this.inventory = inventory;
+		this.discountService = discountService;
 	}
 
 	public void add(String... books) throws BookNotInInventoryException {
@@ -45,19 +48,24 @@ public class ShoppingCart {
 		return Collections.unmodifiableMap(itemsInCart);
 	}
 
-	public int checkout() throws EmptyShoppingCartException {
-		return checkout(new EmptyDiscountCoupon());
+	public int checkout() throws EmptyShoppingCartException, ExpiredDisountCouponException {
+		return _checkout(new EmptyDiscountCoupon());
 	}
 
-	public int checkout(final DisountCoupon coupon) throws EmptyShoppingCartException, ExpiredDisountCouponException {
+	public int checkout(final String couponCode) {
+		DiscountCoupon discountCoupon = discountService.find(couponCode);
+		return _checkout(discountCoupon);
+	}
+
+	private int _checkout(DiscountCoupon discountCoupon) {
 		if (itemsInCart.isEmpty()) {
 			throw new EmptyShoppingCartException();
 		}
-		if (coupon.isExpired()) {
+		if (discountCoupon.isExpired()) {
 			throw new ExpiredDisountCouponException();
 		}
 		int checkoutAmount = items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
-		return checkoutAmount - (checkoutAmount * coupon.getPercentageDiscount()) / 100;
+		return checkoutAmount - (checkoutAmount * discountCoupon.getPercentageDiscount()) / 100;
 	}
 
 }

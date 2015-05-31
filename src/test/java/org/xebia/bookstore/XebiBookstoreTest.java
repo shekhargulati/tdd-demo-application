@@ -2,7 +2,7 @@ package org.xebia.bookstore;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,13 +13,13 @@ import java.util.Collections;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.xebia.bookstore.ShoppingCart;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
 import org.xebia.bookstore.model.Book;
-import org.xebia.bookstore.model.DisountCoupon;
+import org.xebia.bookstore.model.DiscountCoupon;
 import org.xebia.bookstore.service.Inventory;
+import org.xebia.bookstore.service.internal.InMemoryDiscountService;
 import org.xebia.bookstore.service.internal.InMemoryInventory;
 
 public class XebiBookstoreTest {
@@ -37,7 +37,7 @@ public class XebiBookstoreTest {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(2));
 		
-		ShoppingCart cart = new ShoppingCart(inventory);
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
 		cart.add("Effective Java");
 		final int price = cart.checkout();
 		assertThat(price, is(equalTo(40)));
@@ -47,7 +47,9 @@ public class XebiBookstoreTest {
 	public void givenBookInventory_WhenUserCheckoutABookThatDoesNotExistInInventory_ThenExceptionIsThrown() throws Exception {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(2));
-		ShoppingCart cart = new ShoppingCart(inventory);
+		
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
+
 		expectedException.expect(BookNotInInventoryException.class);
 		expectedException.expectMessage(equalTo("Sorry, 'Refactoring to Patterns' not in stock!!"));
 		cart.add("Refactoring to Patterns");
@@ -66,9 +68,10 @@ public class XebiBookstoreTest {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(2));
 		
-		ShoppingCart cart = new ShoppingCart(inventory);
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
 		cart.add("Effective Java");
 		cart.add("OpenShift Cookbook");
+		
 		final int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(95)));
 	}
@@ -77,7 +80,9 @@ public class XebiBookstoreTest {
 	public void givenBookInventory_WhenUserTriesToCheckoutAnEmptyCart_ThenExceptionIsThrown() throws Exception {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(2));
-		ShoppingCart cart = new ShoppingCart(inventory);
+		
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
+		
 		expectedException.expect(EmptyShoppingCartException.class);
 		expectedException.expectMessage("You can't checkout an empty cart. Please first add items to the cart.");
 		cart.checkout();
@@ -95,8 +100,9 @@ public class XebiBookstoreTest {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(5));
 		
-		ShoppingCart cart = new ShoppingCart(inventory);
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
 		cart.add("OpenShift Cookbook", 5);
+
 		int checkoutAmount = cart.checkout();
 		assertThat(checkoutAmount, is(equalTo(275)));
 	}
@@ -112,7 +118,7 @@ public class XebiBookstoreTest {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books());
 		
-		ShoppingCart cart = new ShoppingCart(inventory);
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
 		
 		cart.add("OpenShift Cookbook");
 		int checkoutAmount = cart.checkout();
@@ -127,6 +133,7 @@ public class XebiBookstoreTest {
 	
 	
 	/*
+	 * ****************************** User Story 5 *************************************
 	 * As a user
 	 * I want to be notified when I add more copies than available in inventory
 	 * So that I can remove them from the cart
@@ -136,7 +143,8 @@ public class XebiBookstoreTest {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(2));
 		
-		ShoppingCart cart = new ShoppingCart(inventory);
+		ShoppingCart cart = new ShoppingCart(inventory, new InMemoryDiscountService());
+		
 		expectedException.expect(NotEnoughBooksInInventoryException.class);
 		expectedException.expectMessage(is(equalTo("There are not enough copies of 'OpenShift Cookbook' in the inventory.")));
 
@@ -145,6 +153,7 @@ public class XebiBookstoreTest {
 	
 	
 	/*
+	 * ****************************** User Story 6 *************************************
 	 * As a marketing manager
 	 * I want to create flat percentage discount coupons
 	 * So that users can apply them during checkout and get discounted checkout price and sales improve
@@ -154,13 +163,17 @@ public class XebiBookstoreTest {
 		Inventory inventory = new InMemoryInventory();
 		inventory.add(books(5));
 		
-		ShoppingCart cart = new ShoppingCart(inventory);
+		InMemoryDiscountService discountService = new InMemoryDiscountService();
+		
+		ShoppingCart cart = new ShoppingCart(inventory, discountService);
 		cart.add("Effective Java", 2);
 		cart.add("OpenShift Cookbook", 3);
 		
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
-		int amount = cart.checkout(new DisountCoupon(20, start, end));
+		String couponCode = discountService.create(new DiscountCoupon(20, start, end));
+		
+		int amount = cart.checkout(couponCode);
 		
 		assertThat(amount, is(equalTo(196)));
 	}
