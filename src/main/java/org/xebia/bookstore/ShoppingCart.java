@@ -7,7 +7,10 @@ import java.util.Map;
 
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
+import org.xebia.bookstore.exceptions.ExpiredDisountCouponException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
+import org.xebia.bookstore.model.DisountCoupon;
+import org.xebia.bookstore.model.EmptyDiscountCoupon;
 import org.xebia.bookstore.service.Inventory;
 
 public class ShoppingCart {
@@ -43,10 +46,18 @@ public class ShoppingCart {
 	}
 
 	public int checkout() throws EmptyShoppingCartException {
+		return checkout(new EmptyDiscountCoupon());
+	}
+
+	public int checkout(final DisountCoupon coupon) throws EmptyShoppingCartException, ExpiredDisountCouponException {
 		if (itemsInCart.isEmpty()) {
 			throw new EmptyShoppingCartException();
 		}
-		return items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element);
+		if (coupon.isExpired()) {
+			throw new ExpiredDisountCouponException();
+		}
+		int checkoutAmount = items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
+		return checkoutAmount - (checkoutAmount * coupon.getPercentageDiscount()) / 100;
 	}
 
 }

@@ -1,8 +1,9 @@
-package org.xebia.bookstore.domain;
+package org.xebia.bookstore;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -11,13 +12,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xebia.bookstore.ShoppingCart;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
+import org.xebia.bookstore.exceptions.ExpiredDisountCouponException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
+import org.xebia.bookstore.model.DisountCoupon;
 import org.xebia.bookstore.service.Inventory;
 
 public class ShoppingCartTest {
@@ -149,4 +154,57 @@ public class ShoppingCartTest {
 		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 5);
 		verifyNoMoreInteractions(inventory);
 	}
+
+	@Test
+	public void applyDiscountWhenAValidDisountCouponIsUsedDuringCheckout() throws Exception {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
+		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+
+		cart.add("OpenShift Cookbook", 3);
+		cart.add("Effective Java", 2);
+
+		verify(inventory, times(2)).exists(anyString());
+
+		when(inventory.price("OpenShift Cookbook")).thenReturn(55);
+		when(inventory.price("Effective Java")).thenReturn(40);
+
+		LocalDateTime start = LocalDateTime.now();
+		LocalDateTime end = start.plusHours(24);
+		int cartAmount = cart.checkout(new DisountCoupon(20, start, end));
+
+		assertThat(cartAmount, is(equalTo(196)));
+
+		verify(inventory, times(2)).price(anyString());
+		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
+		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verifyNoMoreInteractions(inventory);
+	}
+
+	@Test
+	public void throwExceptionWhenExpiredDisountCouponIsUsedDuringCheckout() throws Exception {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
+		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+
+		cart.add("OpenShift Cookbook", 3);
+		cart.add("Effective Java", 2);
+
+		verify(inventory, times(2)).exists(anyString());
+		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
+		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verifyNoMoreInteractions(inventory);
+		
+		LocalDateTime start = LocalDateTime.now().minusDays(2);
+		LocalDateTime end = start.plusHours(24);
+		
+		expectedException.expect(isA(ExpiredDisountCouponException.class));
+		expectedException.expectMessage(is(equalTo("Sorry, the coupon code has expired.")));
+		
+		cart.checkout(new DisountCoupon(20, start, end));
+
+	}
+	
+	
+
 }

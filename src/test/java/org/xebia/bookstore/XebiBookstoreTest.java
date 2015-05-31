@@ -2,9 +2,10 @@ package org.xebia.bookstore;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
 import org.xebia.bookstore.model.Book;
+import org.xebia.bookstore.model.DisountCoupon;
 import org.xebia.bookstore.service.Inventory;
 import org.xebia.bookstore.service.internal.InMemoryInventory;
 
@@ -139,8 +141,31 @@ public class XebiBookstoreTest {
 		expectedException.expectMessage(is(equalTo("There are not enough copies of 'OpenShift Cookbook' in the inventory.")));
 
 		cart.add("OpenShift Cookbook", 5);
-		
 	}
+	
+	
+	/*
+	 * As a marketing manager
+	 * I want to create flat percentage discount coupons
+	 * So that users can apply them during checkout and get discounted checkout price and sales improve
+	 */
+	@Test
+	public void givenCustomerHasValidFlatPercentageDiscountCoupon_WhenCustomerAppliesTheCouponDuringCheckout_ThenDiscountIsAppliedToCheckoutAmount() throws Exception {
+		Inventory inventory = new InMemoryInventory();
+		inventory.add(books(5));
+		
+		ShoppingCart cart = new ShoppingCart(inventory);
+		cart.add("Effective Java", 2);
+		cart.add("OpenShift Cookbook", 3);
+		
+		LocalDateTime start = LocalDateTime.now();
+		LocalDateTime end = start.plusHours(24);
+		int amount = cart.checkout(new DisountCoupon(20, start, end));
+		
+		assertThat(amount, is(equalTo(196)));
+	}
+	
+	
 	
 	
 	private static Book[] books() {

@@ -1,4 +1,4 @@
-package org.xebia.bookstore.domain.service;
+package org.xebia.bookstore.service;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
