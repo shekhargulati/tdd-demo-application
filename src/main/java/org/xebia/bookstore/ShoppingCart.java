@@ -65,7 +65,7 @@ public class ShoppingCart {
 			throw new ExpiredDisountCouponException();
 		}
 		int checkoutAmount = items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
-		return checkoutAmount - (checkoutAmount * discountCoupon.getPercentageDiscount()) / 100;
+		return checkoutAmount - discountCoupon.calculateDiscountAmount(checkoutAmount);
 	}
 
 }

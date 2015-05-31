@@ -3,7 +3,7 @@ package org.xebia.bookstore;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -18,12 +18,12 @@ import org.hamcrest.collection.IsMapContaining;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.xebia.bookstore.ShoppingCart;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.ExpiredDisountCouponException;
 import org.xebia.bookstore.exceptions.InvalidDiscountCouponException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
-import org.xebia.bookstore.model.DiscountCoupon;
+import org.xebia.bookstore.model.CashDiscountCoupon;
+import org.xebia.bookstore.model.PercentageDiscountCoupon;
 import org.xebia.bookstore.service.DiscountService;
 import org.xebia.bookstore.service.Inventory;
 
@@ -159,7 +159,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void applyDiscountWhenAValidDisountCouponIsUsedDuringCheckout() throws Exception {
+	public void applyDiscountWhenAValidFlatPercentageDisountCouponIsUsedDuringCheckout() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
 		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
@@ -177,7 +177,7 @@ public class ShoppingCartTest {
 
 		String couponCode = "valid_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new DiscountCoupon(20, start, end));
+		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, end));
 		int cartAmount = cart.checkout(couponCode);
 
 		assertThat(cartAmount, is(equalTo(196)));
@@ -208,7 +208,7 @@ public class ShoppingCartTest {
 
 		String couponCode = "expired_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new DiscountCoupon(20, start, end));
+		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, end));
 
 		expectedException.expect(isA(ExpiredDisountCouponException.class));
 		expectedException.expectMessage(is(equalTo("Sorry, the coupon code has expired.")));
@@ -237,6 +237,60 @@ public class ShoppingCartTest {
 		expectedException.expectMessage(is(equalTo("Sorry, the coupon code you entered does not exist.")));
 
 		cart.checkout(couponCode);
+	}
+
+	@Test
+	public void applyDiscountWhenAValidFlatCashDisountCouponIsUsedDuringCheckout() throws Exception {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
+		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+
+		cart.add("OpenShift Cookbook", 3);
+		cart.add("Effective Java", 2);
+
+		verify(inventory, times(2)).exists(anyString());
+
+		when(inventory.price("OpenShift Cookbook")).thenReturn(55);
+		when(inventory.price("Effective Java")).thenReturn(40);
+
+		LocalDateTime start = LocalDateTime.now();
+		LocalDateTime end = start.plusHours(24);
+
+		String couponCode = "valid_discount_coupon";
+
+		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(20, start, end));
+		int cartAmount = cart.checkout(couponCode);
+
+		assertThat(cartAmount, is(equalTo(225)));
+
+		verify(inventory, times(2)).price(anyString());
+		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
+		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verify(discountService, times(1)).find(couponCode);
+		verifyNoMoreInteractions(inventory, discountService);
+	}
+
+	@Test
+	public void throwExceptionWhenCheckoutAmountAfterApplyingCashDiscountIsLessThan60PercentOfTotalCheckoutAmount() throws Exception {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies("OpenShift Cookbook", 1)).thenReturn(true);
+
+		cart.add("OpenShift Cookbook", 1);
+
+		verify(inventory, times(1)).exists(anyString());
+
+		when(inventory.price("OpenShift Cookbook")).thenReturn(55);
+
+		LocalDateTime start = LocalDateTime.now();
+		LocalDateTime end = start.plusHours(24);
+
+		String couponCode = "valid_discount_coupon";
+
+		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(40, start, end));
+		expectedException.expect(isA(InvalidDiscountCouponException.class));
+		expectedException.expectMessage(is(equalTo("This coupon is not applicable for this checkout amount.")));
+		cart.checkout(couponCode);
+
 	}
 
 }

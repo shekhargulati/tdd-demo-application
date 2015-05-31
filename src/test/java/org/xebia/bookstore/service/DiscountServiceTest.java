@@ -1,12 +1,12 @@
 package org.xebia.bookstore.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.time.LocalDateTime;
 
 import org.junit.Test;
 import org.xebia.bookstore.exceptions.InvalidDiscountCouponException;
-import org.xebia.bookstore.model.DiscountCoupon;
+import org.xebia.bookstore.model.PercentageDiscountCoupon;
 import org.xebia.bookstore.service.internal.InMemoryDiscountService;
 
 public class DiscountServiceTest {
@@ -17,7 +17,7 @@ public class DiscountServiceTest {
 	public void createNewDiscountCouponWithUniqueCouponCode() {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
-		String couponCode = discountService.create(new DiscountCoupon(20, start, end));
+		String couponCode = discountService.create(new PercentageDiscountCoupon(20, start, end));
 		assertNotNull(couponCode);
 	}
 
