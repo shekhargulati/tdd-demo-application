@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.model.Book;
-import org.xebia.bookstore.service.Inventory;
 import org.xebia.bookstore.service.internal.InMemoryInventory;
 
 public class InventoryTest {
@@ -67,7 +66,7 @@ public class InventoryTest {
 
 	@Test
 	public void findBookInOneMillionBooks() throws Exception {
-		IntStream.rangeClosed(1, 1000000).forEach(i -> inventory.add(new Book("book" + i, "author" + i, i, LocalDate.of(2008, Month.MAY, 21), 1, Collections.emptyList())));
+		IntStream.rangeClosed(1, 100000).forEach(i -> inventory.add(new Book("book" + i, "author" + i, i, LocalDate.of(2008, Month.MAY, 21), 1, Collections.emptyList())));
 // long start = System.currentTimeMillis();
 		boolean exists = inventory.exists("book_test");
 // System.out.println("Total time " + (System.currentTimeMillis() - start));
