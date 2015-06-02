@@ -2,7 +2,7 @@ package org.xebia.bookstore;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -193,9 +193,65 @@ public class XebiBookstoreTest {
 		cart.checkout(couponCode);
 	}
 	
+	/*
+	 * ****************************** User Story 8 *************************************
+	 * As a marketing manager
+	 * I want to create discount(cash or percentage) coupons applicable for specific book categories
+	 * So that users can apply them during checkout and get discounted checkout price
+	 */
+	
+	@Test
+	public void givenCustomerHasValidPercentageDiscountCouponApplicableToJavaAndDevOpsCategories_WhenCustomerAppliesToACartWithFewBooksInApplicableCategories_ThenDiscountIsApplied() throws Exception {
+		inventory.add(books(5));
+
+		cart.add("Effective Java", 2);
+		cart.add("Learning Chef", 1);
+		cart.add("Eloquent JavaScript", 1);
+		cart.add("JavaScript -- The Good Parts", 1);
+
+		String couponCode = createFlatPercentageDiscountCoupon(10, "devops", "java");
+
+		int amount = cart.checkout(couponCode);
+
+		assertThat(amount, is(equalTo(157)));
+	}
+
+	@Test
+	public void givenCustomerHasValidCashDiscountCouponApplicableToScalaCategory_WhenCustomerAppliesToACartWithBooksNotInApplicableCategories_ThenNoDiscountIsApplied() throws Exception {
+		inventory.add(books(5));
+
+		cart.add("Effective Java", 2);
+		cart.add("Learning Chef", 1);
+		cart.add("Eloquent JavaScript", 1);
+		cart.add("JavaScript -- The Good Parts", 1);
+
+		String couponCode = createFlatCashDiscountCoupon(10, "scala");
+
+		int amount = cart.checkout(couponCode);
+
+		assertThat(amount, is(equalTo(170)));
+	}
+
+	@Test
+	public void givenCustomerHasValidCashDiscountCouponApplicableToJavaAndDevOpsCategories_WhenCustomerAppliesToACartWithFewBooksInApplicableCategories_ThenDiscountIsApplied() throws Exception {
+		inventory.add(books(5));
+
+		cart.add("Effective Java", 2);
+		cart.add("Learning Chef", 1);
+		cart.add("Eloquent JavaScript", 1);
+		cart.add("JavaScript -- The Good Parts", 1);
+
+		String couponCode = createFlatCashDiscountCoupon(50, "devops", "java");
+
+		int amount = cart.checkout(couponCode);
+
+		assertThat(amount, is(equalTo(120)));
+	}
+	
+	
 	//*************************** Utility methods*********************************************//
 	
-	private String createFlatCashDiscountCoupon(int amount) {
+	private String createFlatCashDiscountCoupon(int amount, String... categories) {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
 		String couponCode = discountService.create(new CashDiscountCoupon(amount, start, end));
@@ -208,11 +264,15 @@ public class XebiBookstoreTest {
 
 	private static Book[] books(int quantity) {
 		Book book1 = new Book("Effective Java", "Joshua Bloch", 40, LocalDate.of(2008, Month.MAY, 28), quantity, Arrays.asList("java", "programming"));
-		Book book2 = new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), quantity, Arrays.asList("cloud", "programming"));
-		return new Book[] { book1, book2 };
+		Book book2 = new Book("Head First Java", "Kathy Siera", 50, LocalDate.of(2008, Month.MAY, 28), quantity, Arrays.asList("java", "programming"));
+		Book book3 = new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), quantity, Arrays.asList("cloud", "programming"));
+		Book book4 = new Book("Learning Chef", "Mischa Taylor", 50, LocalDate.of(2014, Month.OCTOBER, 26), quantity, Arrays.asList("cloud", "devops"));
+		Book book5 = new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), quantity, Arrays.asList("javascript", "programming"));
+		Book book6 = new Book("JavaScript -- The Good Parts", "Douglas Crockford", 30, LocalDate.of(2014, Month.OCTOBER, 26), quantity, Arrays.asList("javascript", "programming"));
+		return new Book[] { book1, book2, book3, book4, book5, book6 };
 	}
-	
-	private String createFlatPercentageDiscountCoupon(int discount) {
+
+	private String createFlatPercentageDiscountCoupon(int discount, String... categories) {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
 		String couponCode = discountService.create(new PercentageDiscountCoupon(discount, start, end));
