@@ -64,8 +64,10 @@ public class ShoppingCart {
 		if (discountCoupon.isExpired()) {
 			throw new ExpiredDisountCouponException();
 		}
+		
 		int checkoutAmount = items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
-		return checkoutAmount - discountCoupon.calculateDiscountAmount(checkoutAmount);
+		int checkoutAmountApplicableForDiscount = items().entrySet().stream().filter(entry -> discountCoupon.getCategories().isEmpty() || !Collections.disjoint(discountCoupon.getCategories(), inventory.find(entry.getKey()).getCategories())).map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
+		return checkoutAmount - discountCoupon.calculateDiscountAmount(checkoutAmountApplicableForDiscount);
 	}
 
 }

@@ -1,6 +1,8 @@
 package org.xebia.bookstore.model;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import org.xebia.bookstore.exceptions.InvalidDiscountCouponException;
 
@@ -10,13 +12,15 @@ public abstract class DiscountCoupon {
 
 	private final LocalDateTime start;
 	private final LocalDateTime end;
+	private final List<String> categories;
 
-	public DiscountCoupon(LocalDateTime start, LocalDateTime end) {
+	public DiscountCoupon(LocalDateTime start, LocalDateTime end, List<String> categories) {
 		if (start.isAfter(end)) {
 			throw new InvalidDiscountCouponException("'start' can not be greater than 'end'.");
 		}
 		this.start = start;
 		this.end = end;
+		this.categories = Collections.unmodifiableList(categories);
 	}
 
 	public String getCouponCode() {
@@ -40,5 +44,9 @@ public abstract class DiscountCoupon {
 	}
 	
 	public abstract int calculateDiscountAmount(int checkoutAmount);
+	
+	public List<String> getCategories() {
+		return categories;
+	}
 
 }

@@ -51,4 +51,12 @@ public class InMemoryInventory implements Inventory {
 			return UUID.randomUUID().toString();
 		}
 	}
+
+	@Override
+	public Book find(String title) {
+		if (!exists(title)) {
+			throw new BookNotInInventoryException(title);
+		}
+		return inventory.get(title);
+	}
 }

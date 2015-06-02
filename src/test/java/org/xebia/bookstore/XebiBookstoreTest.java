@@ -254,7 +254,7 @@ public class XebiBookstoreTest {
 	private String createFlatCashDiscountCoupon(int amount, String... categories) {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
-		String couponCode = discountService.create(new CashDiscountCoupon(amount, start, end));
+		String couponCode = discountService.create(new CashDiscountCoupon(amount, start, end, Arrays.asList(categories)));
 		return couponCode;
 	}
 
@@ -275,7 +275,7 @@ public class XebiBookstoreTest {
 	private String createFlatPercentageDiscountCoupon(int discount, String... categories) {
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
-		String couponCode = discountService.create(new PercentageDiscountCoupon(discount, start, end));
+		String couponCode = discountService.create(new PercentageDiscountCoupon(discount, start, end, Arrays.asList(categories)));
 		return couponCode;
 	}
 	

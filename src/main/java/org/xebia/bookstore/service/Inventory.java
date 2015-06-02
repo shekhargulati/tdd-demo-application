@@ -15,4 +15,6 @@ public interface Inventory {
 
 	boolean hasEnoughCopies(String title, int quantity);
 
+	Book find(String title);
+
 }
