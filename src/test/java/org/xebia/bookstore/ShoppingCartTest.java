@@ -92,7 +92,7 @@ public class ShoppingCartTest {
 	public void cartAmountIsEqualToSumOfAllItemPrices() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
-
+		
 		cart.add("OpenShift Cookbook", "Effective Java", "Clean Code");
 		verify(inventory, times(3)).exists(anyString());
 

@@ -9,16 +9,14 @@ public class CheckoutAmountCalculator {
 
 	private List<ShoppingCartItem> items;
 	private DiscountCoupon discountCoupon;
-	private int checkoutAmount;
 
 	public CheckoutAmountCalculator(List<ShoppingCartItem> items, DiscountCoupon discountCoupon) {
 		this.items = items;
 		this.discountCoupon = discountCoupon;
-		this.checkoutAmount = checkoutAmountWithoutDiscount() - discount();
 	}
 
 	public int checkoutAmount() {
-		return checkoutAmount;
+		return checkoutAmountWithoutDiscount() - discount();
 	}
 
 	private int discount() {
