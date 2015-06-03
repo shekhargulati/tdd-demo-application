@@ -1,11 +1,12 @@
 package org.xebia.bookstore.cart;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
@@ -21,7 +22,7 @@ public class ShoppingCart {
 	private final Inventory inventory;
 	private final DiscountService discountService;
 
-	private Map<String, Integer> itemsInCart = new HashMap<>();
+	private Map<String, Integer> itemsInCart = new LinkedHashMap<>();
 
 	public ShoppingCart(Inventory inventory, DiscountService discountService) {
 		this.inventory = inventory;
@@ -46,8 +47,9 @@ public class ShoppingCart {
 		return itemsInCart.values().stream().reduce(0, (total, quantity) -> total + quantity);
 	}
 
-	public Map<String, Integer> items() {
-		return Collections.unmodifiableMap(itemsInCart);
+	public List<ShoppingCartItem> items() {
+		List<ShoppingCartItem> items = itemsInCart.entrySet().stream().map(entry -> new ShoppingCartItem(inventory.find(entry.getKey()),entry.getValue())).collect(toList());
+		return Collections.unmodifiableList(items);
 	}
 
 	public int checkout() throws EmptyShoppingCartException {
@@ -66,8 +68,7 @@ public class ShoppingCart {
 		if (itemsInCart.isEmpty()) {
 			throw new EmptyShoppingCartException();
 		}
-		List<ShoppingCartItem> items = items().entrySet().stream().map(entry -> new ShoppingCartItem(inventory.find(entry.getKey()),entry.getValue())).collect(Collectors.toList());
-		return new CheckoutAmountCalculator(items, discountCoupon).checkoutAmount();
+		return new CheckoutAmountCalculator(items(), discountCoupon).checkoutAmount();
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package org.xebia.bookstore.cart;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -11,19 +12,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.xebia.bookstore.matchers.IsShoppingCartWithMaxSize.constrainMaxItemsInCart;
 import static org.xebia.bookstore.matchers.IsShoppingCartWithSize.hasSize;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
+import java.util.Collections;
 
-import org.hamcrest.collection.IsMapContaining;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.xebia.bookstore.cart.ShoppingCart;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.ExpiredDisountCouponException;
 import org.xebia.bookstore.exceptions.InvalidDiscountCouponException;
@@ -48,13 +47,13 @@ public class ShoppingCartTest {
 		when(inventory.exists("Effective Java")).thenReturn(true);
 		when(inventory.exists("OpenShift Cookbook")).thenReturn(true);
 
-		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
+		when(inventory.hasEnoughCopies("Effective Java", 1)).thenReturn(true);
+		when(inventory.hasEnoughCopies("OpenShift Cookbook", 1)).thenReturn(true);
 
 		cart.add("Effective Java");
 		cart.add("OpenShift Cookbook");
 
 		assertThat(cart, hasSize(2));
-		assertThat(cart, constrainMaxItemsInCart(10));
 
 		verify(inventory, times(1)).exists("Effective Java");
 		verify(inventory, times(1)).exists("OpenShift Cookbook");
@@ -67,15 +66,36 @@ public class ShoppingCartTest {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
 
-		cart.add("Effective Java", "OpenShift Cookbook", "Java Concurrency in Practice");
+		cart.add("Effective Java", "OpenShift Cookbook");
 
-		assertThat(cart.items().size(), equalTo(3));
-		assertThat(cart.items(), IsMapContaining.hasEntry(equalTo("Effective Java"), equalTo(1)));
+		assertThat(cart, hasSize(2));
+
+		verify(inventory, times(2)).exists(anyString());
+		verify(inventory, times(2)).hasEnoughCopies(anyString(), anyInt());
+		verifyNoMoreInteractions(inventory);
+	}
+
+	@Test
+	public void itemsInTheCartShouldOrderedByInsertionOrder() throws Exception {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
+
+		cart.add("Effective Java", "OpenShift Cookbook", "Clean Code");
+
+		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
+		when(inventory.find("OpenShift Cookbook")).thenReturn(openshiftCookbook());
+		when(inventory.find("Clean Code")).thenReturn(cleanCodeBook());
+
+		assertThat(cart.items(), contains(newShoppingCartItem("Effective Java", 1), newShoppingCartItem("OpenShift Cookbook", 1), newShoppingCartItem("Clean Code", 1)));
 
 		verify(inventory, times(3)).exists(anyString());
 		verify(inventory, times(3)).hasEnoughCopies(anyString(), anyInt());
+		verify(inventory, times(3)).find(anyString());
 		verifyNoMoreInteractions(inventory);
+	}
 
+	private ShoppingCartItem newShoppingCartItem(String title, int quantity) {
+		return new ShoppingCartItem(newBookWithTitle(title), quantity);
 	}
 
 	@Test
@@ -93,7 +113,7 @@ public class ShoppingCartTest {
 	public void cartAmountIsEqualToSumOfAllItemPrices() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
-		
+
 		cart.add("OpenShift Cookbook", "Effective Java", "Clean Code");
 		verify(inventory, times(3)).exists(anyString());
 
@@ -141,7 +161,6 @@ public class ShoppingCartTest {
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
 		when(inventory.find("Clean Code")).thenReturn(cleanCodeBook());
 
-
 		int cartAmount = cart.checkout();
 
 		assertThat(cartAmount, is(equalTo(710)));
@@ -181,13 +200,10 @@ public class ShoppingCartTest {
 		when(inventory.find("OpenShift Cookbook")).thenReturn(openshiftCookbook());
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
 
-
 		LocalDateTime start = LocalDateTime.now();
-		LocalDateTime end = start.plusHours(24);
-
 		String couponCode = "valid_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, end));
+		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, start.plusHours(24)));
 
 		int cartAmount = cart.checkout(couponCode);
 
@@ -215,11 +231,9 @@ public class ShoppingCartTest {
 		verifyNoMoreInteractions(inventory);
 
 		LocalDateTime start = LocalDateTime.now().minusDays(2);
-		LocalDateTime end = start.plusHours(24);
-
 		String couponCode = "expired_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, end));
+		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, start.plusHours(24)));
 
 		expectedException.expect(isA(ExpiredDisountCouponException.class));
 		expectedException.expectMessage(is(equalTo("Sorry, the coupon code has expired.")));
@@ -264,13 +278,10 @@ public class ShoppingCartTest {
 		when(inventory.find("OpenShift Cookbook")).thenReturn(openshiftCookbook());
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
 
-
 		LocalDateTime start = LocalDateTime.now();
-		LocalDateTime end = start.plusHours(24);
-
 		String couponCode = "valid_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(20, start, end));
+		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(20, start, start.plusHours(24)));
 		int cartAmount = cart.checkout(couponCode);
 
 		assertThat(cartAmount, is(equalTo(225)));
@@ -293,13 +304,10 @@ public class ShoppingCartTest {
 
 		when(inventory.find("OpenShift Cookbook")).thenReturn(openshiftCookbook());
 
-
 		LocalDateTime start = LocalDateTime.now();
-		LocalDateTime end = start.plusHours(24);
-
 		String couponCode = "valid_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(40, start, end));
+		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(40, start, start.plusHours(24)));
 		expectedException.expect(isA(InvalidDiscountCouponException.class));
 		expectedException.expectMessage(is(equalTo("This coupon is not applicable for this checkout amount.")));
 		cart.checkout(couponCode);
@@ -372,11 +380,9 @@ public class ShoppingCartTest {
 		when(inventory.find("Eloquent JavaScript")).thenReturn(new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("javascript", "programming")));
 
 		LocalDateTime start = LocalDateTime.now();
-		LocalDateTime end = start.plusHours(24);
-
 		String couponCode = "valid_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, end, Arrays.asList("scala")));
+		when(discountService.find(couponCode)).thenReturn(new PercentageDiscountCoupon(20, start, start.plusHours(24), Arrays.asList("scala")));
 
 		int cartAmount = cart.checkout(couponCode);
 
@@ -412,11 +418,9 @@ public class ShoppingCartTest {
 		when(inventory.find("Eloquent JavaScript")).thenReturn(new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("javascript", "programming")));
 
 		LocalDateTime start = LocalDateTime.now();
-		LocalDateTime end = start.plusHours(24);
-
 		String couponCode = "valid_discount_coupon";
 
-		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(20, start, end, Arrays.asList("scala")));
+		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(20, start, start.plusHours(24), Arrays.asList("scala")));
 
 		int cartAmount = cart.checkout(couponCode);
 
@@ -439,4 +443,7 @@ public class ShoppingCartTest {
 		return new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("cloud", "programming"));
 	}
 
+	private Book newBookWithTitle(String title) {
+		return new Book(title, null, 0, null, 0, Collections.emptyList());
+	}
 }
