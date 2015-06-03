@@ -3,7 +3,7 @@ package org.xebia.bookstore.matchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.xebia.bookstore.ShoppingCart;
+import org.xebia.bookstore.cart.ShoppingCart;
 
 public class IsShoppingCartWithSize extends TypeSafeMatcher<ShoppingCart> {
 

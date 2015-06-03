@@ -1,4 +1,4 @@
-package org.xebia.bookstore;
+package org.xebia.bookstore.cart;
 
 import java.util.Arrays;
 import java.util.Collections;

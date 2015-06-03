@@ -13,6 +13,7 @@ import java.util.Collections;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.xebia.bookstore.cart.ShoppingCart;
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
 import org.xebia.bookstore.exceptions.NotEnoughBooksInInventoryException;
