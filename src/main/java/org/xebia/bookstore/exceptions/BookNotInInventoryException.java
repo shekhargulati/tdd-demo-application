@@ -1,7 +1,5 @@
 package org.xebia.bookstore.exceptions;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class BookNotInInventoryException extends RuntimeException {
 
@@ -11,10 +9,6 @@ public class BookNotInInventoryException extends RuntimeException {
 
 	public BookNotInInventoryException(String book) {
 		super(String.format(SORRY_S_NOT_IN_STOCK, book));
-	}
-
-	public BookNotInInventoryException(List<String> books) {
-		super(books.stream().map(book -> String.format(SORRY_S_NOT_IN_STOCK, book)).collect(Collectors.joining("\\n")));
 	}
 
 }

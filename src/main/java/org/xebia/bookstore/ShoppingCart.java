@@ -48,37 +48,28 @@ public class ShoppingCart {
 		return Collections.unmodifiableMap(itemsInCart);
 	}
 
-	public int checkout() throws EmptyShoppingCartException, ExpiredDisountCouponException {
+	public int checkout() throws EmptyShoppingCartException {
 		return _checkout(new EmptyDiscountCoupon());
 	}
 
-	public int checkout(final String couponCode) {
+	public int checkout(final String couponCode) throws EmptyShoppingCartException, ExpiredDisountCouponException {
 		DiscountCoupon discountCoupon = discountService.find(couponCode);
-		return _checkout(discountCoupon);
-	}
-
-	private int _checkout(DiscountCoupon discountCoupon) {
-		if (itemsInCart.isEmpty()) {
-			throw new EmptyShoppingCartException();
-		}
 		if (discountCoupon.isExpired()) {
 			throw new ExpiredDisountCouponException();
 		}
-		
-		return checkoutAmount() - discountCoupon.calculateDiscountAmount(applicableCheckoutAmount(discountCoupon));
+		return _checkout(discountCoupon);
 	}
 
-	private int applicableCheckoutAmount(DiscountCoupon discountCoupon) {
-		return items().entrySet().stream().filter(entry -> discountCoupon.getCategories().isEmpty() || !Collections.disjoint(discountCoupon.getCategories(), inventory.find(entry.getKey()).getCategories())).map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
-	}
-
-	private int checkoutAmount() {
-		return items().entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
+	private int _checkout(DiscountCoupon discountCoupon) throws EmptyShoppingCartException {
+		if (itemsInCart.isEmpty()) {
+			throw new EmptyShoppingCartException();
+		}
+		return new CheckoutAmountCalculator(inventory, items(), discountCoupon).checkoutAmount();
 	}
 
 	@Override
 	public String toString() {
 		return itemsInCart.toString();
 	}
-	
+
 }
