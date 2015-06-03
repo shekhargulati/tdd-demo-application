@@ -1,20 +1,17 @@
 package org.xebia.bookstore;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import org.xebia.bookstore.model.DiscountCoupon;
-import org.xebia.bookstore.service.Inventory;
 
 public class CheckoutAmountCalculator {
 
-	private Inventory inventory;
-	private Map<String, Integer> items;
+	private List<ShoppingCartItem> items;
 	private DiscountCoupon discountCoupon;
 	private int checkoutAmount;
 
-	public CheckoutAmountCalculator(Inventory inventory, Map<String, Integer> items, DiscountCoupon discountCoupon) {
-		this.inventory = inventory;
+	public CheckoutAmountCalculator(List<ShoppingCartItem> items, DiscountCoupon discountCoupon) {
 		this.items = items;
 		this.discountCoupon = discountCoupon;
 		this.checkoutAmount = checkoutAmountWithoutDiscount() - discount();
@@ -29,11 +26,11 @@ public class CheckoutAmountCalculator {
 	}
 
 	private int checkoutAmountWithoutDiscount() {
-		return items.entrySet().stream().map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
+		return items.stream().map(item -> item.getQuantity() * item.getBook().getPrice()).reduce(0, (sum, element) -> sum += element).intValue();
 	}
 
 	private int applicableCheckoutAmount() {
-		return items.entrySet().stream().filter(entry -> discountCoupon.getCategories().isEmpty() || !Collections.disjoint(discountCoupon.getCategories(), inventory.find(entry.getKey()).getCategories())).map(entry -> entry.getValue() * inventory.price(entry.getKey())).reduce(0, (sum, element) -> sum += element).intValue();
+		return items.stream().filter(item -> discountCoupon.getCategories().isEmpty() || !Collections.disjoint(discountCoupon.getCategories(), item.getBook().getCategories())).map(item -> item.getQuantity() * item.getBook().getPrice()).reduce(0, (sum, element) -> sum += element).intValue();
 	}
 
 }

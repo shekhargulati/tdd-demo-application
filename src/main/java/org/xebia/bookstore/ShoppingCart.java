@@ -3,7 +3,9 @@ package org.xebia.bookstore;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.xebia.bookstore.exceptions.BookNotInInventoryException;
 import org.xebia.bookstore.exceptions.EmptyShoppingCartException;
@@ -64,7 +66,8 @@ public class ShoppingCart {
 		if (itemsInCart.isEmpty()) {
 			throw new EmptyShoppingCartException();
 		}
-		return new CheckoutAmountCalculator(inventory, items(), discountCoupon).checkoutAmount();
+		List<ShoppingCartItem> items = items().entrySet().stream().map(entry -> new ShoppingCartItem(inventory.find(entry.getKey()),entry.getValue())).collect(Collectors.toList());
+		return new CheckoutAmountCalculator(items, discountCoupon).checkoutAmount();
 	}
 
 	@Override
