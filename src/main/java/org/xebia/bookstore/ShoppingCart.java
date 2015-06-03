@@ -70,4 +70,9 @@ public class ShoppingCart {
 		return checkoutAmount - discountCoupon.calculateDiscountAmount(checkoutAmountApplicableForDiscount);
 	}
 
+	@Override
+	public String toString() {
+		return itemsInCart.toString();
+	}
+	
 }

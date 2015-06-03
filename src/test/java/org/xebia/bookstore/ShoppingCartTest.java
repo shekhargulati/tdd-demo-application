@@ -11,6 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.xebia.bookstore.matchers.IsShoppingCartWithMaxSize.constrainMaxItemsInCart;
+import static org.xebia.bookstore.matchers.IsShoppingCartWithSize.hasSize;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,7 +52,8 @@ public class ShoppingCartTest {
 		cart.add("Effective Java");
 		cart.add("OpenShift Cookbook");
 
-		assertThat(cart.size(), is(equalTo(2)));
+		assertThat(cart, hasSize(2));
+		assertThat(cart, constrainMaxItemsInCart(10));
 
 		verify(inventory, times(1)).exists("Effective Java");
 		verify(inventory, times(1)).exists("OpenShift Cookbook");
