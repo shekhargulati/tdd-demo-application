@@ -76,16 +76,16 @@ public class InventoryTest {
 	@Test
 	public void findPriceOfBookInInventory() throws Exception {
 		inventory.add(books());
-		int price = inventory.price("Effective Java");
+		int price = inventory.find("Effective Java").getPrice();
 		assertThat(price, is(equalTo(40)));
 	}
 
 	@Test
-	public void throwExceptionWhenPriceCheckedForBookNotInInventory() throws Exception {
+	public void throwExceptionWhenBookNotInInventory() throws Exception {
 		expectedException.expect(isA(BookNotInInventoryException.class));
 		expectedException.expectMessage(is(equalTo("Sorry, 'Effective Java' not in stock!!")));
 
-		inventory.price("Effective Java");
+		inventory.find("Effective Java");
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class InventoryTest {
 		Book book = inventory.find("Effective Java");
 		assertThat(book.getPrice(), is(equalTo(40)));
 	}
-	
+
 	@Test
 	public void findThrowExceptionWhenBookNotInInventory() throws Exception {
 		expectedException.expect(isA(BookNotInInventoryException.class));

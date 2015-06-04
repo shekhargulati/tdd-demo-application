@@ -76,7 +76,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void itemsInTheCartShouldOrderedByInsertionOrder() throws Exception {
+	public void cartItemsOrderedByInsertionWhenItemsAreAddedToCart() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
 
@@ -92,10 +92,6 @@ public class ShoppingCartTest {
 		verify(inventory, times(3)).hasEnoughCopies(anyString(), anyInt());
 		verify(inventory, times(3)).find(anyString());
 		verifyNoMoreInteractions(inventory);
-	}
-
-	private ShoppingCartItem newShoppingCartItem(String title, int quantity) {
-		return new ShoppingCartItem(newBookWithTitle(title), quantity);
 	}
 
 	@Test
@@ -188,17 +184,11 @@ public class ShoppingCartTest {
 
 	@Test
 	public void applyDiscountWhenAValidFlatPercentageDisountCouponIsUsedDuringCheckout() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+		setupCartForDiscountTests();
 
-		cart.add("OpenShift Cookbook", 3);
-		cart.add("Effective Java", 2);
-
-		verify(inventory, times(2)).exists(anyString());
-
-		when(inventory.find("OpenShift Cookbook")).thenReturn(openshiftCookbook());
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
+		when(inventory.find("Learning Chef")).thenReturn(learningChef());
+		when(inventory.find("Eloquent JavaScript")).thenReturn(eloquentJavaScript());
 
 		LocalDateTime start = LocalDateTime.now();
 		String couponCode = "valid_discount_coupon";
@@ -207,27 +197,16 @@ public class ShoppingCartTest {
 
 		int cartAmount = cart.checkout(couponCode);
 
-		assertThat(cartAmount, is(equalTo(196)));
+		assertThat(cartAmount, is(equalTo(112)));
 
-		verify(inventory, times(2)).find(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verify(inventory, times(3)).find(anyString());
 		verify(discountService, times(1)).find(couponCode);
 		verifyNoMoreInteractions(inventory, discountService);
 	}
 
 	@Test
 	public void throwExceptionWhenExpiredDisountCouponIsUsedDuringCheckout() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
-
-		cart.add("OpenShift Cookbook", 3);
-		cart.add("Effective Java", 2);
-
-		verify(inventory, times(2)).exists(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		setupCartForDiscountTests();
 		verifyNoMoreInteractions(inventory);
 
 		LocalDateTime start = LocalDateTime.now().minusDays(2);
@@ -242,17 +221,7 @@ public class ShoppingCartTest {
 
 	@Test
 	public void throwExceptionWhenCouponCodeDoesNotExist() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
-
-		cart.add("OpenShift Cookbook", 3);
-		cart.add("Effective Java", 2);
-
-		verify(inventory, times(2)).exists(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
-		verifyNoMoreInteractions(inventory);
+		setupCartForDiscountTests();
 
 		String couponCode = "invalid_discount_coupon";
 
@@ -266,17 +235,11 @@ public class ShoppingCartTest {
 
 	@Test
 	public void applyDiscountWhenAValidFlatCashDisountCouponIsUsedDuringCheckout() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("OpenShift Cookbook", 3)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+		setupCartForDiscountTests();
 
-		cart.add("OpenShift Cookbook", 3);
-		cart.add("Effective Java", 2);
-
-		verify(inventory, times(2)).exists(anyString());
-
-		when(inventory.find("OpenShift Cookbook")).thenReturn(openshiftCookbook());
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
+		when(inventory.find("Learning Chef")).thenReturn(learningChef());
+		when(inventory.find("Eloquent JavaScript")).thenReturn(eloquentJavaScript());
 
 		LocalDateTime start = LocalDateTime.now();
 		String couponCode = "valid_discount_coupon";
@@ -284,11 +247,9 @@ public class ShoppingCartTest {
 		when(discountService.find(couponCode)).thenReturn(new CashDiscountCoupon(20, start, start.plusHours(24)));
 		int cartAmount = cart.checkout(couponCode);
 
-		assertThat(cartAmount, is(equalTo(225)));
+		assertThat(cartAmount, is(equalTo(120)));
 
-		verify(inventory, times(2)).find(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("OpenShift Cookbook", 3);
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verify(inventory, times(3)).find(anyString());
 		verify(discountService, times(1)).find(couponCode);
 		verifyNoMoreInteractions(inventory, discountService);
 	}
@@ -315,27 +276,11 @@ public class ShoppingCartTest {
 
 	@Test
 	public void percentageDiscountIsAppliedToCheckoutAmountWhenCartHasBooksInCategoriesDiscountCouponIsApplicable() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Learning Chef", 1)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Eloquent JavaScript", 1)).thenReturn(true);
-
-		cart.add("Effective Java", 2);
-		cart.add("Learning Chef", 1);
-		cart.add("Eloquent JavaScript", 1);
-
-		verify(inventory, times(3)).exists(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
-		verify(inventory, times(1)).hasEnoughCopies("Learning Chef", 1);
-		verify(inventory, times(1)).hasEnoughCopies("Eloquent JavaScript", 1);
-
-		when(inventory.price("Effective Java")).thenReturn(40);
-		when(inventory.price("Learning Chef")).thenReturn(50);
-		when(inventory.price("Eloquent JavaScript")).thenReturn(10);
+		setupCartForDiscountTests();
 
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
-		when(inventory.find("Learning Chef")).thenReturn(new Book("Learning Chef", "Mischa Taylor", 50, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("cloud", "devops")));
-		when(inventory.find("Eloquent JavaScript")).thenReturn(new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("javascript", "programming")));
+		when(inventory.find("Learning Chef")).thenReturn(learningChef());
+		when(inventory.find("Eloquent JavaScript")).thenReturn(eloquentJavaScript());
 
 		LocalDateTime start = LocalDateTime.now();
 		LocalDateTime end = start.plusHours(24);
@@ -349,7 +294,6 @@ public class ShoppingCartTest {
 		assertThat(cartAmount, is(equalTo(114)));
 
 		verify(inventory, times(3)).find(anyString());
-		verify(inventory, times(3)).find(anyString());
 		verify(discountService, times(1)).find(couponCode);
 		verifyNoMoreInteractions(inventory, discountService);
 
@@ -357,27 +301,11 @@ public class ShoppingCartTest {
 
 	@Test
 	public void percentageDiscountIsNotAppliedToCheckoutAmountWhenCartHasBooksInCategoriesDiscountCouponIsNotApplicable() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Learning Chef", 1)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Eloquent JavaScript", 1)).thenReturn(true);
-
-		cart.add("Effective Java", 2);
-		cart.add("Learning Chef", 1);
-		cart.add("Eloquent JavaScript", 1);
-
-		verify(inventory, times(3)).exists(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
-		verify(inventory, times(1)).hasEnoughCopies("Learning Chef", 1);
-		verify(inventory, times(1)).hasEnoughCopies("Eloquent JavaScript", 1);
-
-		when(inventory.price("Effective Java")).thenReturn(40);
-		when(inventory.price("Learning Chef")).thenReturn(50);
-		when(inventory.price("Eloquent JavaScript")).thenReturn(10);
+		setupCartForDiscountTests();
 
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
-		when(inventory.find("Learning Chef")).thenReturn(new Book("Learning Chef", "Mischa Taylor", 50, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("cloud", "devops")));
-		when(inventory.find("Eloquent JavaScript")).thenReturn(new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("javascript", "programming")));
+		when(inventory.find("Learning Chef")).thenReturn(learningChef());
+		when(inventory.find("Eloquent JavaScript")).thenReturn(eloquentJavaScript());
 
 		LocalDateTime start = LocalDateTime.now();
 		String couponCode = "valid_discount_coupon";
@@ -395,27 +323,11 @@ public class ShoppingCartTest {
 
 	@Test
 	public void cashDiscountIsNotAppliedToCheckoutAmountWhenCartHasBooksInCategoriesDiscountCouponIsNotApplicable() throws Exception {
-		when(inventory.exists(anyString())).thenReturn(true);
-		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Learning Chef", 1)).thenReturn(true);
-		when(inventory.hasEnoughCopies("Eloquent JavaScript", 1)).thenReturn(true);
-
-		cart.add("Effective Java", 2);
-		cart.add("Learning Chef", 1);
-		cart.add("Eloquent JavaScript", 1);
-
-		verify(inventory, times(3)).exists(anyString());
-		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
-		verify(inventory, times(1)).hasEnoughCopies("Learning Chef", 1);
-		verify(inventory, times(1)).hasEnoughCopies("Eloquent JavaScript", 1);
-
-		when(inventory.price("Effective Java")).thenReturn(40);
-		when(inventory.price("Learning Chef")).thenReturn(50);
-		when(inventory.price("Eloquent JavaScript")).thenReturn(10);
+		setupCartForDiscountTests();
 
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
-		when(inventory.find("Learning Chef")).thenReturn(new Book("Learning Chef", "Mischa Taylor", 50, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("cloud", "devops")));
-		when(inventory.find("Eloquent JavaScript")).thenReturn(new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("javascript", "programming")));
+		when(inventory.find("Learning Chef")).thenReturn(learningChef());
+		when(inventory.find("Eloquent JavaScript")).thenReturn(eloquentJavaScript());
 
 		LocalDateTime start = LocalDateTime.now();
 		String couponCode = "valid_discount_coupon";
@@ -443,7 +355,35 @@ public class ShoppingCartTest {
 		return new Book("OpenShift Cookbook", "Shekhar Gulati", 55, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("cloud", "programming"));
 	}
 
+	private Book eloquentJavaScript() {
+		return new Book("Eloquent JavaScript", "Marjin Haverbeke", 10, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("javascript", "programming"));
+	}
+
+	private Book learningChef() {
+		return new Book("Learning Chef", "Mischa Taylor", 50, LocalDate.of(2014, Month.OCTOBER, 26), 10, Arrays.asList("cloud", "devops"));
+	}
+
+	private ShoppingCartItem newShoppingCartItem(String title, int quantity) {
+		return new ShoppingCartItem(newBookWithTitle(title), quantity);
+	}
+
 	private Book newBookWithTitle(String title) {
 		return new Book(title, null, 0, null, 0, Collections.emptyList());
+	}
+
+	private void setupCartForDiscountTests() {
+		when(inventory.exists(anyString())).thenReturn(true);
+		when(inventory.hasEnoughCopies("Effective Java", 2)).thenReturn(true);
+		when(inventory.hasEnoughCopies("Learning Chef", 1)).thenReturn(true);
+		when(inventory.hasEnoughCopies("Eloquent JavaScript", 1)).thenReturn(true);
+
+		cart.add("Effective Java", 2);
+		cart.add("Learning Chef", 1);
+		cart.add("Eloquent JavaScript", 1);
+
+		verify(inventory, times(3)).exists(anyString());
+		verify(inventory, times(1)).hasEnoughCopies("Effective Java", 2);
+		verify(inventory, times(1)).hasEnoughCopies("Learning Chef", 1);
+		verify(inventory, times(1)).hasEnoughCopies("Eloquent JavaScript", 1);
 	}
 }

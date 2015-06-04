@@ -19,14 +19,6 @@ public class InMemoryInventory implements Inventory {
 	}
 
 	@Override
-	public int price(String title) throws BookNotInInventoryException {
-		if (!exists(title)) {
-			throw new BookNotInInventoryException(title);
-		}
-		return inventory.get(title).getPrice();
-	}
-
-	@Override
 	public String[] add(Book... books) {
 		return Arrays.stream(books).map(book -> add(book)).toArray(String[]::new);
 
