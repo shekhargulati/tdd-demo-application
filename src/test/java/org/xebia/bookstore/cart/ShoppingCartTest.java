@@ -43,7 +43,7 @@ public class ShoppingCartTest {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Test
-	public void canAddMultipleBooksToTheShoppingCart() throws Exception {
+	public void cartWithSizeTwoWhenTwoBooksAreAddedToTheShoppingCartOneByOne() throws Exception {
 		when(inventory.exists("Effective Java")).thenReturn(true);
 		when(inventory.exists("OpenShift Cookbook")).thenReturn(true);
 
@@ -62,7 +62,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void canAddMultipleBooksToTheShoppingCartInOneGo() throws Exception {
+	public void cartWithSizeTwoWhenTwoBooksAreAddedToTheShoppingCartInOneGo() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
 
@@ -106,7 +106,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void cartAmountIsEqualToSumOfAllItemPrices() throws Exception {
+	public void cartAmountEqualsToSumOfAllItemPricesWhenCheckout() throws Exception {
 		when(inventory.exists(anyString())).thenReturn(true);
 		when(inventory.hasEnoughCopies(anyString(), anyInt())).thenReturn(true);
 
@@ -127,7 +127,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void canAddMultipleQuantiesOfBook() throws Exception {
+	public void cartSizeEqualsItemsAddedToCartWhenMultipleCopiesAreAddedToTheCart() throws Exception {
 		when(inventory.exists("Effective Java")).thenReturn(true);
 
 		when(inventory.hasEnoughCopies("Effective Java", 10)).thenReturn(true);
@@ -183,7 +183,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void applyDiscountWhenAValidFlatPercentageDisountCouponIsUsedDuringCheckout() throws Exception {
+	public void applyDiscountDuringCheckoutWhenAValidFlatPercentageDisountCouponIsUsed() throws Exception {
 		setupCartForDiscountTests();
 
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
@@ -205,7 +205,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void throwExceptionWhenExpiredDisountCouponIsUsedDuringCheckout() throws Exception {
+	public void throwExceptionDuringCheckoutWhenExpiredDisountCouponIsUsed() throws Exception {
 		setupCartForDiscountTests();
 		verifyNoMoreInteractions(inventory);
 
@@ -220,7 +220,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void throwExceptionWhenCouponCodeDoesNotExist() throws Exception {
+	public void throwExceptionDuringCheckoutWhenCouponCodeDoesNotExist() throws Exception {
 		setupCartForDiscountTests();
 
 		String couponCode = "invalid_discount_coupon";
@@ -234,7 +234,7 @@ public class ShoppingCartTest {
 	}
 
 	@Test
-	public void applyDiscountWhenAValidFlatCashDisountCouponIsUsedDuringCheckout() throws Exception {
+	public void applyDiscountDuringCheckoutWhenAValidFlatCashDisountCouponIsUsed() throws Exception {
 		setupCartForDiscountTests();
 
 		when(inventory.find("Effective Java")).thenReturn(effectiveJava());
